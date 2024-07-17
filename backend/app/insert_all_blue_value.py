@@ -14,15 +14,15 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 # Define the base
 Base = declarative_base()
 
-# Define the APIData model
-
 
 class APIData(Base):
+    # Define the APIData model
     __tablename__ = 'dollar_blue_historical'
     id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(String)
     value_sell = Column(Integer)
     value_buy = Column(Integer)
+    value_average = Column(Integer)
 
 
 # Create an engine
@@ -41,7 +41,8 @@ session = Session()
 data_records = get_all_blue()
 
 # Create instances of the APIData model for each record
-api_data_instances = [APIData(date=record[0], value_sell=record[1], value_buy=record[2]) for record in data_records]
+api_data_instances = [APIData(date=record[0], value_sell=record[1], value_buy=record[2],
+                              value_average=(record[1] + record[2])/2) for record in data_records]
 
 # Add all instances to the session in bulk
 session.bulk_save_objects(api_data_instances)
