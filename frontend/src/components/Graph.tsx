@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import moment from "moment";
 import { Value } from "../models/value";
+import { formatCurrencyARS } from "../utils/format_currency";
 
 const buttonClassLeft =
   "bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l";
@@ -105,7 +106,8 @@ const Graph: React.FC = () => {
     return <div>{error}</div>;
   }
   return (
-    <div>
+    <div className="pt-5">
+      <h2 className="text-2xl">Historical Data</h2>
       <div className="inline-flex" style={{ marginBottom: "20px" }}>
         <button
           className={buttonClassLeft}
@@ -171,6 +173,7 @@ const Graph: React.FC = () => {
           <YAxis domain={[minValue, maxValue]} /> {/* Use calculated domain */}
           <Tooltip
             labelFormatter={(label) => moment(label).format("YYYY-MM-DD")}
+            formatter={(value: number) => formatCurrencyARS(value)}
           />
           <Legend />
           <Line
