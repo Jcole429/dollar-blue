@@ -2,16 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
-type Price = {
-  id: number;
-  date: string;
-  value_sell: number;
-  value_buy: number;
-};
+import { Value } from "../models/value";
 
 const ExchangeRatesTable: React.FC = () => {
-  const [prices, setPrices] = useState<Price[]>([]);
+  const [values, setValues] = useState<Value[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,7 +13,7 @@ const ExchangeRatesTable: React.FC = () => {
     const fetchPrices = async () => {
       try {
         const response = await axios.get("/api/prices?limit=5");
-        setPrices(response.data);
+        setValues(response.data);
         setLoading(false);
       } catch (error) {
         setError("Error fetching prices");
@@ -50,7 +44,7 @@ const ExchangeRatesTable: React.FC = () => {
         </tr>
       </thead>
       <tbody>
-        {prices.map((price) => (
+        {values.map((price) => (
           <tr key={price.date}>
             <td className="border border-gray-200 px-4 py-2">{price.id}</td>
             <td className="border border-gray-200 px-4 py-2">
@@ -63,7 +57,7 @@ const ExchangeRatesTable: React.FC = () => {
               {price.value_buy}
             </td>
             <td className="border border-gray-200 px-4 py-2">
-              {(price.value_sell + price.value_buy) / 2}
+              {price.value_average}
             </td>
           </tr>
         ))}
