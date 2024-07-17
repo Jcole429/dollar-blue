@@ -1,7 +1,7 @@
 from utils.fetch_latest_data import fetch_latest_data
 
 
-def fetch_latest_blue():
+def get_latest_blue():
     _json = fetch_latest_data()
     last_price = _json['blue']['value_avg']
     last_update = _json['last_update']

@@ -2,7 +2,7 @@ import os
 from sqlalchemy import create_engine, Column, Integer, String, JSON
 from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
-from utils.fetch_latest_blue import fetch_latest_blue
+from utils.get_latest_blue import get_latest_blue
 
 
 # Load environment variables from the .env file
@@ -37,7 +37,7 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 # Get data
-last_price, last_update = fetch_latest_blue()
+last_price, last_update = get_latest_blue()
 
 # Create an instance of the APIData model
 api_data_instance = APIData(datetime=last_update, value=last_price)
