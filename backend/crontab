@@ -1,0 +1,2 @@
+# crontab
+*/10 * * * * /usr/local/bin/python3 /usr/src/app/insert_latest_blue_value.py >> /var/log/cron.log 2>&1
