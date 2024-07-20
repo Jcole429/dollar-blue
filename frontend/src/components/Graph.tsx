@@ -17,9 +17,7 @@ import { Value } from "../models/value";
 import { formatCurrencyARS } from "../utils/format_currency";
 
 const buttonClassBase = "text-gray-800 font-bold py-2 px-4";
-
 const buttonClassSelected = "bg-blue-500 hover:bg-blue-600 text-white";
-
 const buttonClassUnselected = "bg-gray-300 hover:bg-gray-400 text-gray-800";
 
 const Graph: React.FC = () => {
@@ -114,7 +112,7 @@ const Graph: React.FC = () => {
   }
 
   return (
-    <div className="pt-5">
+    <div className="pt-5 w-[800px]">
       <h2 className="text-2xl">Historical Data</h2>
       <div className="inline-flex" style={{ marginBottom: "20px" }}>
         <button
