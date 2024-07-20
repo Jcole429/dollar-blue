@@ -111,6 +111,23 @@ const Graph: React.FC = () => {
     return <div>{error}</div>;
   }
 
+  const CustomXAxisTick = ({ x, y, payload }) => {
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text
+          x={0}
+          y={0}
+          dy={16}
+          textAnchor="end"
+          fill="#666"
+          transform="rotate(-45)"
+        >
+          {payload.value}
+        </text>
+      </g>
+    );
+  };
+
   return (
     <div className="pt-5 w-[800px]">
       <h2 className="text-2xl">Historical Data</h2>
@@ -186,20 +203,26 @@ const Graph: React.FC = () => {
             top: 5,
             right: 30,
             left: 20,
-            bottom: 5,
+            bottom: 80, // Increase bottom margin for rotated labels
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             dataKey="date"
             tickFormatter={(tick) => moment(tick).format("YYYY-MM-DD")}
+            tick={CustomXAxisTick}
           />
           <YAxis domain={[minValue, maxValue]} /> {/* Use calculated domain */}
           <Tooltip
             labelFormatter={(label) => moment(label).format("YYYY-MM-DD")}
             formatter={(value: number) => formatCurrencyARS(value)}
           />
-          <Legend />
+          <Legend
+            layout="vertical"
+            verticalAlign="top"
+            align="right"
+            wrapperStyle={{ paddingLeft: 20 }}
+          />
           <Line
             type="monotone"
             dataKey="value"
