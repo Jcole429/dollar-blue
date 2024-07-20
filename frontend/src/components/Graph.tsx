@@ -89,7 +89,7 @@ const Graph: React.FC = () => {
 
   useEffect(() => {
     handleRangeChange(selectedRange); // Apply the selected filter when `selectedRange` changes
-  }, [values, selectedRange, handleRangeChange]);
+  }, [selectedRange, handleRangeChange]);
 
   const handleButtonClick = (range: string) => {
     setSelectedRange(range);
