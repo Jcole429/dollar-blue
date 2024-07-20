@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import {
   LineChart,
@@ -16,22 +16,20 @@ import moment from "moment";
 import { Value } from "../models/value";
 import { formatCurrencyARS } from "../utils/format_currency";
 
-const buttonClassLeft =
-  "bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l";
+const buttonClassBase = "text-gray-800 font-bold py-2 px-4";
 
-const buttonClassMiddle =
-  "bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4";
+const buttonClassSelected = "bg-blue-500 hover:bg-blue-600 text-white";
 
-const buttonClassRight =
-  "bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r";
+const buttonClassUnselected = "bg-gray-300 hover:bg-gray-400 text-gray-800";
 
 const Graph: React.FC = () => {
-  const [value, setValues] = useState<Value[]>([]);
+  const [values, setValues] = useState<Value[]>([]);
   const [filteredPrices, setFilteredPrices] = useState<Value[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [minValue, setMinValue] = useState<number>(0);
   const [maxValue, setMaxValue] = useState<number>(0);
+  const [selectedRange, setSelectedRange] = useState<string>("1m"); // State to track the selected filter
 
   useEffect(() => {
     const fetchPrices = async () => {
@@ -60,43 +58,50 @@ const Graph: React.FC = () => {
     fetchPrices();
   }, []);
 
-  const handleRangeChange = (range: string) => {
-    let startDate = null;
-    switch (range) {
-      case "max":
-        setFilteredPrices(value);
-        return;
-      case "10y":
-        startDate = moment().subtract(10, "years");
-        break;
-      case "5y":
-        startDate = moment().subtract(5, "years");
-        break;
-      case "1y":
-        startDate = moment().subtract(1, "year");
-        break;
-      case "6m":
-        startDate = moment().subtract(6, "months");
-        break;
-      case "1m":
-        startDate = moment().subtract(1, "month");
-        break;
-      case "1w":
-        startDate = moment().subtract(1, "week");
-        break;
-      default:
-        setFilteredPrices(value);
-        return;
-    }
-    const filtered = value.filter((price) =>
-      moment(price.date).isAfter(startDate)
-    );
-    setFilteredPrices(filtered);
-  };
+  const handleRangeChange = useCallback(
+    (range: string) => {
+      let startDate = null;
+      switch (range) {
+        case "max":
+          setFilteredPrices(values);
+          return;
+        case "10y":
+          startDate = moment().subtract(10, "years");
+          break;
+        case "5y":
+          startDate = moment().subtract(5, "years");
+          break;
+        case "1y":
+          startDate = moment().subtract(1, "year");
+          break;
+        case "6m":
+          startDate = moment().subtract(6, "months");
+          break;
+        case "1m":
+          startDate = moment().subtract(1, "month");
+          break;
+        case "1w":
+          startDate = moment().subtract(1, "week");
+          break;
+        default:
+          setFilteredPrices(values);
+          return;
+      }
+      const filtered = values.filter((price) =>
+        moment(price.date).isAfter(startDate)
+      );
+      setFilteredPrices(filtered);
+    },
+    [values]
+  );
 
   useEffect(() => {
-    setFilteredPrices(value);
-  }, [value]);
+    handleRangeChange(selectedRange); // Apply the selected filter when `selectedRange` changes
+  }, [values, selectedRange, handleRangeChange]);
+
+  const handleButtonClick = (range: string) => {
+    setSelectedRange(range);
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -105,49 +110,68 @@ const Graph: React.FC = () => {
   if (error) {
     return <div>{error}</div>;
   }
+
   return (
     <div className="pt-5">
       <h2 className="text-2xl">Historical Data</h2>
       <div className="inline-flex" style={{ marginBottom: "20px" }}>
         <button
-          className={buttonClassLeft}
-          onClick={() => handleRangeChange("max")}
+          className={`${buttonClassBase} ${
+            selectedRange === "max"
+              ? buttonClassSelected
+              : buttonClassUnselected
+          } rounded-l`}
+          onClick={() => handleButtonClick("max")}
         >
           Max
         </button>
         <button
-          className={buttonClassMiddle}
-          onClick={() => handleRangeChange("10y")}
+          className={`${buttonClassBase} ${
+            selectedRange === "10y"
+              ? buttonClassSelected
+              : buttonClassUnselected
+          }`}
+          onClick={() => handleButtonClick("10y")}
         >
           10 Years
         </button>
         <button
-          className={buttonClassMiddle}
-          onClick={() => handleRangeChange("5y")}
+          className={`${buttonClassBase} ${
+            selectedRange === "5y" ? buttonClassSelected : buttonClassUnselected
+          }`}
+          onClick={() => handleButtonClick("5y")}
         >
           5 Years
         </button>
         <button
-          className={buttonClassMiddle}
-          onClick={() => handleRangeChange("1y")}
+          className={`${buttonClassBase} ${
+            selectedRange === "1y" ? buttonClassSelected : buttonClassUnselected
+          }`}
+          onClick={() => handleButtonClick("1y")}
         >
           1 Year
         </button>
         <button
-          className={buttonClassMiddle}
-          onClick={() => handleRangeChange("6m")}
+          className={`${buttonClassBase} ${
+            selectedRange === "6m" ? buttonClassSelected : buttonClassUnselected
+          }`}
+          onClick={() => handleButtonClick("6m")}
         >
           6 Months
         </button>
         <button
-          className={buttonClassMiddle}
-          onClick={() => handleRangeChange("1m")}
+          className={`${buttonClassBase} ${
+            selectedRange === "1m" ? buttonClassSelected : buttonClassUnselected
+          }`}
+          onClick={() => handleButtonClick("1m")}
         >
           1 Month
         </button>
         <button
-          className={buttonClassRight}
-          onClick={() => handleRangeChange("1w")}
+          className={`${buttonClassBase} ${
+            selectedRange === "1w" ? buttonClassSelected : buttonClassUnselected
+          } rounded-r`}
+          onClick={() => handleButtonClick("1w")}
         >
           1 Week
         </button>
