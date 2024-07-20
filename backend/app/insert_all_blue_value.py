@@ -1,9 +1,10 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, JSON
+from sqlalchemy import create_engine, Column, Integer, String, JSON, text
 from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
 from utils.get_all_blue import get_all_blue
 
+TABLE_NAME = 'dollar_blue_historical'
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -17,7 +18,7 @@ Base = declarative_base()
 
 class APIData(Base):
     # Define the APIData model
-    __tablename__ = 'dollar_blue_historical'
+    __tablename__ = TABLE_NAME
     id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(String)
     value_sell = Column(Integer)
@@ -27,6 +28,11 @@ class APIData(Base):
 
 # Create an engine
 engine = create_engine(DATABASE_URL)
+
+# Drop the table if it exists
+with engine.connect() as connection:
+    connection.execute(text(f'DROP TABLE IF EXISTS {TABLE_NAME}'))
+
 
 # Create the table
 Base.metadata.create_all(engine)
