@@ -27,8 +27,6 @@ const Graph: React.FC = () => {
   const [filteredPrices, setFilteredPrices] = useState<Value[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [minValue, setMinValue] = useState<number>(0);
-  const [maxValue, setMaxValue] = useState<number>(0);
   const [selectedRange, setSelectedRange] = useState<string>("1m"); // State to track the selected filter
 
   useEffect(() => {
@@ -42,12 +40,6 @@ const Graph: React.FC = () => {
         }));
 
         setValues(pricesData);
-
-        // Calculate min and max values
-        const values = pricesData.map((d: Value) => d.value_average);
-        setMinValue(Math.min(...values));
-        setMaxValue(Math.max(...values));
-
         setLoading(false);
       } catch (error) {
         setError("Error fetching prices");
@@ -102,6 +94,16 @@ const Graph: React.FC = () => {
   const handleButtonClick = (range: string) => {
     setSelectedRange(range);
   };
+
+  // Compute min and max values based on filtered data
+  const minValue =
+    filteredPrices.length > 0
+      ? Math.min(...filteredPrices.map((d) => d.value_average))
+      : 0;
+  const maxValue =
+    filteredPrices.length > 0
+      ? Math.max(...filteredPrices.map((d) => d.value_average))
+      : 0;
 
   if (loading) {
     return <div>Loading...</div>;
