@@ -7,6 +7,7 @@ export default function Home() {
       <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight">
         Latest Argentinian Pesos to USD Exchange Rates
       </h1>
+      <LatestRate />
       <ExchangeRatesTable />
       <Graph />
     </div>
