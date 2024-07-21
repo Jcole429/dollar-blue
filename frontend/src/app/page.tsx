@@ -1,5 +1,7 @@
 import ExchangeRatesTable from "../components/ExchangeRatesTable";
 import Graph from "../components/Graph";
+import LatestRate from "@/components/LatestRate";
+import Converter from "@/components/Converter";
 
 export default function Home() {
   return (
@@ -8,8 +10,9 @@ export default function Home() {
         Latest Argentinian Pesos to USD Exchange Rates
       </h1>
       <LatestRate />
-      <ExchangeRatesTable />
-      <Graph />
+      <Converter />
+      {/* <ExchangeRatesTable /> */}
+      {/* <Graph /> */}
     </div>
   );
 }

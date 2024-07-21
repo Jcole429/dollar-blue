@@ -14,3 +14,10 @@ export const formatCurrencyARS = (
 
   return new Intl.NumberFormat("es-AR", options).format(value);
 };
+
+export const formatCurrencyUSD = (value) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(value);
+};
