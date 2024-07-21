@@ -15,7 +15,7 @@ export const formatCurrencyARS = (
   return new Intl.NumberFormat("es-AR", options).format(value);
 };
 
-export const formatCurrencyUSD = (value) => {
+export const formatCurrencyUSD = (value: number) => {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",

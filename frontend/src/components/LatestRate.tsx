@@ -43,7 +43,7 @@ const LatestRate: React.FC = () => {
     return <div>{error}</div>;
   }
   return (
-    <div className="w-80 pt-5">
+    <div className="w-80 p-4">
       <h2 className="text-2xl">Latest Exchange Rate</h2>
       <table className="min-w-full border-collapse border border-gray-200">
         <thead>

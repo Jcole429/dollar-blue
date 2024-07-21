@@ -61,7 +61,7 @@ const Converter: React.FC = () => {
   };
 
   return (
-    <div className="pt-5">
+    <div className="p-4">
       <h2 className="text-2xl">Currency Converter</h2>
       <div className="flex">
         <div className="m-4 p-4 border rounded basis-0">
