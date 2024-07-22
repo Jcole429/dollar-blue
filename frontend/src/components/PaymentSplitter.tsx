@@ -17,6 +17,7 @@ const PaymentSplitter: React.FC = () => {
   >("");
 
   // Variables
+  const [firstPaymentExists, setFirstPaymentExists] = useState<Boolean>(false);
   const [totalPayment, setTotalPayment] = useState<Currency | null>(null);
   const [firstPayment, setFirstPayment] = useState<Currency | null>(null);
   const [remainingAfterFirstPayment, setRemainingAfterFirstPayment] =
@@ -65,6 +66,7 @@ const PaymentSplitter: React.FC = () => {
   ) => {
     const inputValue = event.target.value;
     setMaxFirstPaymentARSInput(inputValue);
+
     if (exchangeRate !== null) {
       const maxFirstPaymentARSInputParsed =
         typeof inputValue === "number" ? inputValue : parseFloat(inputValue);
@@ -79,19 +81,32 @@ const PaymentSplitter: React.FC = () => {
 
   useEffect(() => {
     if (
-      firstPayment !== null &&
-      totalPayment !== null &&
-      exchangeRate !== null
+      maxFirstPaymentARSInput !== null &&
+      maxFirstPaymentARSInput !== 0 &&
+      maxFirstPaymentARSInput !== ""
     ) {
-      console.log("totalPayment: " + totalPayment!.valueARS);
-      console.log("firstPayment: " + firstPayment!.valueARS);
+      setFirstPaymentExists(true);
+    } else {
+      setFirstPaymentExists(false);
+    }
+  }, [maxFirstPaymentARSInput]);
+
+  useEffect(() => {
+    if (totalPayment !== null && exchangeRate !== null) {
+      let remaining: number;
+      if (firstPaymentExists) {
+        remaining = totalPayment.valueARS - firstPayment!.valueARS;
+      } else {
+        remaining = totalPayment.valueARS;
+      }
+
       setRemainingAfterFirstPayment(
         new Currency(exchangeRate, {
-          ars: totalPayment.valueARS - firstPayment!.valueARS,
+          ars: remaining,
         })
       );
     }
-  }, [firstPayment, totalPayment, exchangeRate]);
+  }, [firstPaymentExists, firstPayment, totalPayment, exchangeRate]);
 
   useEffect(() => {
     if (remainingAfterFirstPayment !== null && exchangeRate !== null) {
@@ -157,27 +172,30 @@ const PaymentSplitter: React.FC = () => {
           </tr>
         </thead>
         <tbody>
+          {firstPaymentExists && (
+            <tr>
+              <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
+                1
+              </td>
+              <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
+                ARS
+              </td>
+              <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
+                {firstPayment !== null
+                  ? formatCurrencyARS(firstPayment.valueARS, true)
+                  : ""}
+              </td>
+              <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
+                {firstPayment !== null
+                  ? formatCurrencyUSD(firstPayment.valueUSD)
+                  : ""}
+              </td>
+            </tr>
+          )}
           <tr>
             <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
-              1
-            </td>
-            <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
-              ARS
-            </td>
-            <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
-              {firstPayment !== null
-                ? formatCurrencyARS(firstPayment.valueARS, true)
-                : ""}
-            </td>
-            <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
-              {firstPayment !== null
-                ? formatCurrencyUSD(firstPayment.valueUSD)
-                : ""}
-            </td>
-          </tr>
-          <tr>
-            <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
-              2
+              {firstPaymentExists && 2}
+              {!firstPaymentExists && 1}
             </td>
             <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
               USD
@@ -195,7 +213,8 @@ const PaymentSplitter: React.FC = () => {
           </tr>
           <tr>
             <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
-              3
+              {firstPaymentExists && 3}
+              {!firstPaymentExists && 2}
             </td>
             <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
               ARS
