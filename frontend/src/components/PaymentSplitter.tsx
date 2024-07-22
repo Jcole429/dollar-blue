@@ -6,6 +6,8 @@ import { formatCurrencyARS, formatCurrencyUSD } from "../utils/format_currency";
 import { Currency } from "../models/Currency"; // Adjust the import path as needed
 
 const PaymentSplitter: React.FC = () => {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
 
   // Inputs
@@ -50,8 +52,7 @@ const PaymentSplitter: React.FC = () => {
     setTotalPaymentARSInput(inputValue);
 
     if (exchangeRate !== null) {
-      const totalPaymentARSInputParsed =
-        typeof inputValue === "number" ? inputValue : parseFloat(inputValue);
+      const totalPaymentARSInputParsed = parseFloat(inputValue);
 
       setTotalPayment(
         new Currency(exchangeRate, {
@@ -65,12 +66,18 @@ const PaymentSplitter: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const inputValue = event.target.value;
+    const maxFirstPaymentARSInputParsed = parseFloat(inputValue);
+
+    if (totalPayment && maxFirstPaymentARSInputParsed > totalPayment.valueARS) {
+      setErrorMessage("First payment cannot be greater than total payment.");
+      setMaxFirstPaymentARSInput(inputValue);
+      return;
+    }
+
+    setErrorMessage(null);
     setMaxFirstPaymentARSInput(inputValue);
 
     if (exchangeRate !== null) {
-      const maxFirstPaymentARSInputParsed =
-        typeof inputValue === "number" ? inputValue : parseFloat(inputValue);
-
       setFirstPayment(
         new Currency(exchangeRate, {
           ars: maxFirstPaymentARSInputParsed,
@@ -160,6 +167,7 @@ const PaymentSplitter: React.FC = () => {
             placeholder="$ARS"
             className="border border-gray-300 px-4 py-2"
           />
+          {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
         </div>
       </div>
       <table className="min-w-full border-collapse border border-gray-200">
