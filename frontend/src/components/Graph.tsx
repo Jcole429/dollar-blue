@@ -110,8 +110,19 @@ const Graph: React.FC = () => {
   if (error) {
     return <div>{error}</div>;
   }
-
-  const CustomXAxisTick = ({ x, y, payload }) => {
+  // Define the type for the props
+  interface CustomXAxisTickProps {
+    x: number;
+    y: number;
+    payload: {
+      value: string;
+    };
+  }
+  const CustomXAxisTick: React.FC<CustomXAxisTickProps> = ({
+    x,
+    y,
+    payload,
+  }) => {
     return (
       <g transform={`translate(${x},${y})`}>
         <text
@@ -210,7 +221,15 @@ const Graph: React.FC = () => {
           <XAxis
             dataKey="date"
             tickFormatter={(tick) => moment(tick).format("YYYY-MM-DD")}
-            tick={CustomXAxisTick}
+            tick={
+              <CustomXAxisTick
+                x={0}
+                y={0}
+                payload={{
+                  value: "",
+                }}
+              />
+            }
           />
           <YAxis domain={[minValue, maxValue]} /> {/* Use calculated domain */}
           <Tooltip
