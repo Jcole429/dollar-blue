@@ -7,17 +7,19 @@ import { ExchangeRateProvider } from "@/contexts/ExhangeRateContext";
 
 export default function Home() {
   return (
-    <div className="max-w-[600px] mx-auto border">
-      <h1 className="p-4 mb-4 text-4xl font-extrabold leading-none tracking-tight">
-        Dollar Blue
-      </h1>
-      <ExchangeRateProvider>
-        <LatestRateDisplay />
-        <Converter />
-        <PaymentSplitter />
-        {/* <ExchangeRatesTable /> */}
-        {/* <Graph /> */}
-      </ExchangeRateProvider>
+    <div className="max-w-[600px] mx-auto">
+      <div className="border m-4">
+        <h1 className="p-4 mb-4 text-4xl font-extrabold leading-none tracking-tight">
+          Dollar Blue
+        </h1>
+        <ExchangeRateProvider>
+          <LatestRateDisplay />
+          <Converter />
+          <PaymentSplitter />
+          {/* <ExchangeRatesTable /> */}
+          {/* <Graph /> */}
+        </ExchangeRateProvider>
+      </div>
     </div>
   );
 }
