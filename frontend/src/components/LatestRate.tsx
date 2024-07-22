@@ -10,6 +10,7 @@ const LatestRate: React.FC = () => {
   const [latestRateSell, setLatestRateSell] = useState<number | null>(null);
   const [latestRateBuy, setLatestRateBuy] = useState<number | null>(null);
   const [latestUpdatedAt, setLatestUpdatedAt] = useState<Date | null>(null);
+  const [timeSinceLastUpdate, setTimeSinceLastUpdate] = useState<string>("");
 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +36,27 @@ const LatestRate: React.FC = () => {
     fetchPrices();
   }, []);
 
+  useEffect(() => {
+    console.log("updating");
+    if (latestUpdatedAt) {
+      const now = new Date();
+      const diffMs = now.getTime() - latestUpdatedAt.getTime();
+      const diffMins = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+
+      if (diffDays > 0) {
+        setTimeSinceLastUpdate(`${diffDays} days ago`);
+      } else if (diffHours > 0) {
+        setTimeSinceLastUpdate(`${diffHours} hours ago`);
+      } else if (diffMins > 0) {
+        setTimeSinceLastUpdate(`${diffMins} minutes ago`);
+      } else {
+        setTimeSinceLastUpdate("just now");
+      }
+    }
+  }, [latestUpdatedAt]);
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -49,6 +71,7 @@ const LatestRate: React.FC = () => {
         <thead>
           <tr>
             <th className="border border-gray-200 px-2 py-1">Updated At</th>
+            <th className="border border-gray-200 px-2 py-1">Time Since</th>
             <th className="border border-gray-200 px-2 py-1">Average</th>
             <th className="border border-gray-200 px-2 py-1">Sell</th>
             <th className="border border-gray-200 px-2 py-1">Buy</th>
@@ -58,6 +81,9 @@ const LatestRate: React.FC = () => {
           <tr>
             <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
               {latestUpdatedAt ? formatDate(latestUpdatedAt) : "N/A"}
+            </td>
+            <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
+              {timeSinceLastUpdate}
             </td>
             <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
               {formatCurrencyARS(latestRateAvg!, true)}
