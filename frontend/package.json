@@ -12,6 +12,7 @@
     "stop-task": "node src/scripts/fetchExchangeRate.mjs stop"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.3.1",
     "axios": "^1.7.2",
     "moment": "^2.30.1",
     "next": "14.2.5",
