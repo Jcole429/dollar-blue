@@ -54,25 +54,25 @@ const Converter: React.FC = () => {
     <div className="p-4 m-4 border">
       <h2 className="text-2xl">Currency Converter</h2>
       <div className="flex">
-        <div className="mt-4 mr-1 p-4 border rounded basis-0">
+        <div className="flex-auto mt-4 mr-1 p-4 border rounded">
           <h3>{"USD -> ARS"}</h3>
           <input
             type="number"
             value={dollarAmount}
             onChange={handleInputChange}
             placeholder="$USD"
-            className="border border-gray-300 px-4 py-2"
+            className="w-full border border-gray-300 px-4 py-2"
           />
           <p>ARS: {arsAmount !== null ? formatCurrencyARS(arsAmount) : ""}</p>
         </div>
-        <div className="mt-4 ml-1 p-4 border rounded basis-0">
+        <div className="flex-auto mt-4 ml-1 p-4 border rounded">
           <h3>{"ARS -> USD"}</h3>
           <input
             type="number"
             value={arsToUsdAmount}
             onChange={handleArsInputChange}
             placeholder="$ARS"
-            className="border border-gray-300 px-4 py-2"
+            className="w-full border border-gray-300 px-4 py-2"
           />
           <p>USD: {usdAmount !== null ? formatCurrencyUSD(usdAmount) : ""}</p>
         </div>

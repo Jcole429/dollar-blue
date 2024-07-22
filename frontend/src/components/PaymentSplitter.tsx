@@ -137,29 +137,29 @@ const PaymentSplitter: React.FC = () => {
     <div className="p-4 m-4 border">
       <h2 className="text-2xl">Payment Splitter</h2>
       <div className="flex">
-        <div className="mb-4 mt-4 mr-1 p-4 border rounded basis-0">
+        <div className="flex-auto mb-4 mt-4 mr-1 p-4 border rounded basis-0">
           <label className="block mb-1">Total Payment (ARS)</label>
           <input
             type="number"
             value={totalPaymentARSInput}
             onChange={handleTotalPaymentChange}
             placeholder="$ARS"
-            className="border border-gray-300 px-4 py-2"
+            className="w-full border border-gray-300 px-4 py-2"
           />
         </div>
-        <div className="mb-4 mt-4 ml-1 p-4 border rounded basis-0">
+        <div className="flex-auto mb-4 mt-4 ml-1 p-4 border rounded basis-0">
           <label className="block mb-1">First Payment (ARS)</label>
           <input
             type="number"
             value={maxFirstPaymentARSInput}
             onChange={handleMaxFirstPaymentChange}
             placeholder="$ARS"
-            className="border border-gray-300 px-4 py-2"
+            className="w-full border border-gray-300 px-4 py-2"
           />
           {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
         </div>
       </div>
-      <table className="border-collapse border border-gray-200">
+      <table className="w-full border-collapse border border-gray-200">
         <thead>
           <tr>
             <th className="border border-gray-200 px-2 py-1">Payment</th>

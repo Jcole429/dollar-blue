@@ -7,9 +7,9 @@ import { ExchangeRateProvider } from "@/contexts/ExhangeRateContext";
 
 export default function Home() {
   return (
-    <div className="w-[600px]">
-      <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight">
-        Latest Argentinian Pesos to USD Exchange Rates
+    <div className="max-w-[600px] mx-auto border">
+      <h1 className="p-4 mb-4 text-4xl font-extrabold leading-none tracking-tight">
+        Dollar Blue
       </h1>
       <ExchangeRateProvider>
         <LatestRateDisplay />
