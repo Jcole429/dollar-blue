@@ -23,13 +23,15 @@ const PaymentSplitter: React.FC = () => {
   const [maxFirstPaymentARSInput, setMaxFirstPaymentARSInput] = useState<
     number | string
   >("");
+  const [usdLimitInput, setUsdLimitInput] = useState<number | string>("");
 
   // Variables
-  const [firstPaymentExists, setFirstPaymentExists] = useState<Boolean>(false);
   const [totalPayment, setTotalPayment] = useState<Currency | null>(null);
   const [firstPayment, setFirstPayment] = useState<Currency | null>(null);
+  const [firstPaymentExists, setFirstPaymentExists] = useState<Boolean>(false);
   const [remainingAfterFirstPayment, setRemainingAfterFirstPayment] =
     useState<Currency | null>(null);
+  const [usdLimit, setUsdLimit] = useState<Currency | null>(null);
   const [usdPayment, setUsdPayment] = useState<Currency | null>(null);
   const [remainingArsPayment, setRemainingArsPayment] =
     useState<Currency | null>(null);
@@ -74,6 +76,25 @@ const PaymentSplitter: React.FC = () => {
       );
     }
   };
+  const handleUsdLimitChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = event.target.value;
+    const inputValueParsed = parseFloat(inputValue);
+
+    setUsdLimitInput(inputValue);
+
+    if (inputValue === "") {
+      setUsdLimit(null);
+      return;
+    }
+
+    if (exchangeRateBlueAvg !== null) {
+      setUsdLimit(
+        new Currency(exchangeRateBlueAvg, {
+          usd: inputValueParsed,
+        })
+      );
+    }
+  };
 
   useEffect(() => {
     if (
@@ -102,16 +123,28 @@ const PaymentSplitter: React.FC = () => {
         })
       );
     }
-  }, [firstPaymentExists, firstPayment, totalPayment, exchangeRateBlueAvg]);
+  }, [
+    firstPaymentExists,
+    firstPayment,
+    totalPayment,
+    exchangeRateBlueAvg,
+    usdLimit,
+  ]);
 
   useEffect(() => {
     if (remainingAfterFirstPayment !== null && exchangeRateBlueAvg !== null) {
-      console.log(
-        "remainingAfterFirstPayment: " + remainingAfterFirstPayment!.valueARS
-      );
+      let usdPayment = 0;
+      let maxUsdPossible =
+        Math.floor(remainingAfterFirstPayment.valueUSD / 100) * 100;
+
+      if (usdLimit && maxUsdPossible > usdLimit.valueUSD) {
+        usdPayment = Math.floor(usdLimit.valueUSD / 100) * 100;
+      } else {
+        usdPayment = maxUsdPossible;
+      }
       setUsdPayment(
         new Currency(exchangeRateBlueAvg, {
-          usd: Math.floor(remainingAfterFirstPayment.valueUSD / 100) * 100,
+          usd: usdPayment,
         })
       );
     }
@@ -123,8 +156,6 @@ const PaymentSplitter: React.FC = () => {
       remainingAfterFirstPayment !== null &&
       exchangeRateBlueAvg !== null
     ) {
-      console.log("usdPayment: " + usdPayment!.valueUSD);
-
       setRemainingArsPayment(
         new Currency(exchangeRateBlueAvg, {
           ars: remainingAfterFirstPayment.valueARS - usdPayment.valueARS,
@@ -148,6 +179,7 @@ const PaymentSplitter: React.FC = () => {
           Optionally, enter an initial payment in ARS before calculating the USD
           payment.
         </li>
+        <li>Optionally, enter the max amount of USD to use.</li>
       </ol>
       <div className="flex">
         <div className="flex-auto mb-4 mt-4 mr-1 p-4 border rounded basis-0">
@@ -160,7 +192,7 @@ const PaymentSplitter: React.FC = () => {
             className="w-full border border-gray-300 px-4 py-2"
           />
         </div>
-        <div className="flex-auto mb-4 mt-4 ml-1 p-4 border rounded basis-0">
+        <div className="flex-auto mb-4 mt-4 ml-1 mr-1 p-4 border rounded basis-0">
           <label className="block mb-1">First Payment (ARS)</label>
           <input
             type="number"
@@ -170,6 +202,19 @@ const PaymentSplitter: React.FC = () => {
             className="w-full border border-gray-300 px-4 py-2"
           />
           {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
+        </div>
+        <div className="flex flex-auto flex-col justify-between mb-4 mt-4 ml-1 p-4 border rounded basis-0">
+          <label className="block mb-1">USD Limit</label>
+          {/* <div className="flex-1"></div> */}
+          <div className="">
+            <input
+              type="number"
+              value={usdLimitInput}
+              onChange={handleUsdLimitChange}
+              placeholder="$USD"
+              className="w-full border border-gray-300 px-4 py-2"
+            />
+          </div>
         </div>
       </div>
       <table className="w-full border-collapse border border-gray-200">

@@ -7,7 +7,7 @@ import { ExchangeRateProvider } from "@/contexts/ExhangeRateContext";
 
 export default function Home() {
   return (
-    <div className="max-w-[600px] mx-auto">
+    <div className="max-w-[800px] mx-auto">
       <div className="border m-2">
         <h1 className="p-2 mb-4 text-4xl font-extrabold leading-none tracking-tight">
           Dollar Blue
