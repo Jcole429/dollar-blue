@@ -21,38 +21,36 @@ const LatestRateDisplay: React.FC = () => {
   } = context;
 
   return (
-    <div className="p-4 m-4 border">
+    <div className="p-2 m-2 border">
       <h2 className="text-2xl">Latest ARS to USD Exchange Rate</h2>
-      <div className="border p-4 mt-4">
-        <table className="w-full border-collapse border border-gray-200">
-          <thead>
-            <tr>
-              <th className="border border-gray-200 px-2 py-1">Average</th>
-              <th className="border border-gray-200 px-2 py-1">Sell</th>
-              <th className="border border-gray-200 px-2 py-1">Buy</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
-                {formatCurrencyARS(exchangeRateBlueAvg!, true)}
-              </td>
-              <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
-                {formatCurrencyARS(exchangeRateBlueSell!, true)}
-              </td>
-              <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
-                {formatCurrencyARS(exchangeRateBlueBuy!, true)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <p>Last updated: {exchangeRateTimeSinceLastUpdate}</p>
-        <p>
-          {exchangeRateLastUpdated !== null
-            ? formatDate(exchangeRateLastUpdated)
-            : ""}
-        </p>
-      </div>
+      <table className="w-full border-collapse border border-gray-200 mt-4">
+        <thead>
+          <tr>
+            <th className="border border-gray-200 px-2 py-1">Average</th>
+            <th className="border border-gray-200 px-2 py-1">Sell</th>
+            <th className="border border-gray-200 px-2 py-1">Buy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap">
+              {formatCurrencyARS(exchangeRateBlueAvg!, true)}
+            </td>
+            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap">
+              {formatCurrencyARS(exchangeRateBlueSell!, true)}
+            </td>
+            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap">
+              {formatCurrencyARS(exchangeRateBlueBuy!, true)}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Last updated: {exchangeRateTimeSinceLastUpdate}</p>
+      <p>
+        {exchangeRateLastUpdated !== null
+          ? formatDate(exchangeRateLastUpdated)
+          : ""}
+      </p>
     </div>
   );
 };

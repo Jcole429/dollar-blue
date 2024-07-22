@@ -134,7 +134,7 @@ const PaymentSplitter: React.FC = () => {
   }, [usdPayment]);
 
   return (
-    <div className="p-4 m-4 border">
+    <div className="p-2 m-2 border">
       <h2 className="text-2xl">Payment Splitter</h2>
       <div className="flex">
         <div className="flex-auto mb-4 mt-4 mr-1 p-4 border rounded basis-0">
@@ -162,27 +162,29 @@ const PaymentSplitter: React.FC = () => {
       <table className="w-full border-collapse border border-gray-200">
         <thead>
           <tr>
-            <th className="border border-gray-200 px-2 py-1">Payment</th>
-            <th className="border border-gray-200 px-2 py-1">Currency</th>
-            <th className="border border-gray-200 px-2 py-1">Value ARS</th>
-            <th className="border border-gray-200 px-2 py-1">Value USD</th>
+            <th className="border border-gray-200 px-2 py-1 flex-initial w-10">
+              Payment
+            </th>
+            <th className="border border-gray-200 px-2 py-1 flex-auto">
+              Value ARS
+            </th>
+            <th className="border border-gray-200 px-2 py-1 flex-auto">
+              Value USD
+            </th>
           </tr>
         </thead>
         <tbody>
           {firstPaymentExists && (
             <tr>
-              <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
+              <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-initial w-10">
                 1
               </td>
-              <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
-                ARS
-              </td>
-              <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
+              <td className="border border-gray-200 px-2 py-2 whitespace-nowrap underline flex-auto">
                 {firstPayment !== null
                   ? formatCurrencyARS(firstPayment.valueARS, true)
                   : ""}
               </td>
-              <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
+              <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-auto">
                 {firstPayment !== null
                   ? formatCurrencyUSD(firstPayment.valueUSD)
                   : ""}
@@ -190,54 +192,47 @@ const PaymentSplitter: React.FC = () => {
             </tr>
           )}
           <tr>
-            <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
+            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-initial w-10">
               {firstPaymentExists && 2}
               {!firstPaymentExists && 1}
             </td>
-            <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
-              USD
-            </td>
-            <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
+            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-auto">
               {usdPayment !== null
                 ? formatCurrencyARS(usdPayment.valueARS, true)
                 : ""}
             </td>
-            <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
+            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap underline flex-auto">
               {usdPayment !== null
                 ? formatCurrencyUSD(usdPayment.valueUSD)
                 : ""}
             </td>
           </tr>
           <tr>
-            <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
+            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-initial w-10">
               {firstPaymentExists && 3}
               {!firstPaymentExists && 2}
             </td>
-            <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
-              ARS
-            </td>
-            <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
+            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap underline flex-auto">
               {remainingArsPayment !== null
                 ? formatCurrencyARS(remainingArsPayment.valueARS, true)
                 : ""}
             </td>
-            <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
+            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-auto">
               {remainingArsPayment !== null
                 ? formatCurrencyUSD(remainingArsPayment.valueUSD)
                 : ""}
             </td>
           </tr>
           <tr className="font-bold">
-            <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
+            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-initial w-10">
               Total
             </td>
-            <td className="border border-gray-200 px-4 py-2 whitespace-nowrap"></td>
-            <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
+            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-auto">
               {totalPayment !== null
                 ? formatCurrencyARS(totalPayment.valueARS, true)
                 : ""}
             </td>
-            <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
+            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-auto">
               {totalPayment !== null
                 ? formatCurrencyUSD(totalPayment.valueUSD)
                 : ""}
