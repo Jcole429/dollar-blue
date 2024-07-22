@@ -1,56 +1,46 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect, useContext } from "react";
 import { formatCurrencyARS, formatCurrencyUSD } from "../utils/format_currency";
+import { ExchangeRateContext } from "@/contexts/ExhangeRateContext";
 
 const Converter: React.FC = () => {
+  const context = useContext(ExchangeRateContext);
+
+  if (!context) {
+    throw new Error("PaymentSplitter must be used within a ValueAvgProvider");
+  }
+
+  const { exchangeRateBlueAvg } = context;
+
   const [dollarAmount, setDollarAmount] = useState<number | string>("");
-  const [valueAvg, setValueAvg] = useState<number | null>(null);
   const [arsAmount, setArsAmount] = useState<number | null>(null);
   const [arsToUsdAmount, setArsToUsdAmount] = useState<number | string>("");
   const [usdAmount, setUsdAmount] = useState<number | null>(null);
 
   useEffect(() => {
-    // Fetch the latest value_avg from an API
-    const fetchValueAvg = async () => {
-      try {
-        const response = await axios.get(
-          "https://api.bluelytics.com.ar/v2/latest"
-        ); // Replace with your API endpoint
-        console.log("Ran API");
-        setValueAvg(response.data.blue.value_avg); // Ensure this path matches your API response structure
-      } catch (error) {
-        console.error("Error fetching value_avg:", error);
-      }
-    };
-
-    fetchValueAvg();
-  }, []);
-
-  useEffect(() => {
-    if (valueAvg !== null && dollarAmount !== "") {
+    if (exchangeRateBlueAvg !== null && dollarAmount !== "") {
       const amount =
         typeof dollarAmount === "number"
           ? dollarAmount
           : parseFloat(dollarAmount);
-      setArsAmount(amount * valueAvg);
+      setArsAmount(amount * exchangeRateBlueAvg);
     } else {
       setArsAmount(null);
     }
-  }, [dollarAmount, valueAvg]);
+  }, [dollarAmount, exchangeRateBlueAvg]);
 
   useEffect(() => {
-    if (valueAvg !== null && arsToUsdAmount !== "") {
+    if (exchangeRateBlueAvg !== null && arsToUsdAmount !== "") {
       const amount =
         typeof arsToUsdAmount === "number"
           ? arsToUsdAmount
           : parseFloat(arsToUsdAmount);
-      setUsdAmount(amount / valueAvg);
+      setUsdAmount(amount / exchangeRateBlueAvg);
     } else {
       setUsdAmount(null);
     }
-  }, [arsToUsdAmount, valueAvg]);
+  }, [arsToUsdAmount, exchangeRateBlueAvg]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDollarAmount(event.target.value);

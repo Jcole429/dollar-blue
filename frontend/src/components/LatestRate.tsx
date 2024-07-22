@@ -1,69 +1,35 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState, useContext } from "react";
 import { formatCurrencyARS } from "../utils/format_currency";
 import { formatDate } from "@/utils/format_date";
+import { ExchangeRateContext } from "@/contexts/ExhangeRateContext";
 
 const LatestRate: React.FC = () => {
-  const [latestRateAvg, setLatestRateAvg] = useState<number | null>(null);
-  const [latestRateSell, setLatestRateSell] = useState<number | null>(null);
-  const [latestRateBuy, setLatestRateBuy] = useState<number | null>(null);
-  const [latestUpdatedAt, setLatestUpdatedAt] = useState<Date | null>(null);
-  const [timeSinceLastUpdate, setTimeSinceLastUpdate] = useState<string>("");
+  const context = useContext(ExchangeRateContext);
 
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchPrices = async () => {
-      try {
-        const response = await axios.get(
-          "https://api.bluelytics.com.ar/v2/latest"
-        );
-        setLatestRateAvg(response.data.blue.value_avg);
-        setLatestRateSell(response.data.blue.value_sell);
-        setLatestRateBuy(response.data.blue.value_buy);
-        setLatestUpdatedAt(new Date(response.data.last_update));
-
-        setLoading(false);
-      } catch (error) {
-        setError("Error fetching latest rate");
-        setLoading(false);
-      }
-    };
-
-    fetchPrices();
-  }, []);
-
-  useEffect(() => {
-    console.log("updating");
-    if (latestUpdatedAt) {
-      const now = new Date();
-      const diffMs = now.getTime() - latestUpdatedAt.getTime();
-      const diffMins = Math.floor(diffMs / (1000 * 60));
-      const diffHours = Math.floor(diffMins / 60);
-      const diffDays = Math.floor(diffHours / 24);
-
-      if (diffDays > 0) {
-        setTimeSinceLastUpdate(`${diffDays} days ago`);
-      } else if (diffHours > 0) {
-        setTimeSinceLastUpdate(`${diffHours} hours ago`);
-      } else if (diffMins > 0) {
-        setTimeSinceLastUpdate(`${diffMins} minutes ago`);
-      } else {
-        setTimeSinceLastUpdate("just now");
-      }
-    }
-  }, [latestUpdatedAt]);
-
-  if (loading) {
-    return <div>Loading...</div>;
+  if (!context) {
+    throw new Error("PaymentSplitter must be used within a ValueAvgProvider");
   }
 
-  if (error) {
-    return <div>{error}</div>;
-  }
+  const {
+    exchangeRateBlueAvg,
+    exchangeRateBlueBuy,
+    exchangeRateBlueSell,
+    exchangeRateLastUpdated,
+    exchangeRateTimeSinceLastUpdate,
+  } = context;
+
+  // const [loading, setLoading] = useState<boolean>(true);
+  // const [error, setError] = useState<string | null>(null);
+
+  // if (loading) {
+  //   return <div>Loading...</div>;
+  // }
+
+  // if (error) {
+  //   return <div>{error}</div>;
+  // }
   return (
     <div className="p-4 m-4 w-[800px] border">
       <h2 className="text-2xl">Latest Exchange Rate</h2>
@@ -80,19 +46,21 @@ const LatestRate: React.FC = () => {
         <tbody>
           <tr>
             <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
-              {latestUpdatedAt ? formatDate(latestUpdatedAt) : "N/A"}
+              {exchangeRateLastUpdated
+                ? formatDate(exchangeRateLastUpdated)
+                : "N/A"}
             </td>
             <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
-              {timeSinceLastUpdate}
+              {exchangeRateTimeSinceLastUpdate}
             </td>
             <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
-              {formatCurrencyARS(latestRateAvg!, true)}
+              {formatCurrencyARS(exchangeRateBlueAvg!, true)}
             </td>
             <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
-              {formatCurrencyARS(latestRateSell!, true)}
+              {formatCurrencyARS(exchangeRateBlueSell!, true)}
             </td>
             <td className="border border-gray-200 px-4 py-2 whitespace-nowrap">
-              {formatCurrencyARS(latestRateBuy!, true)}
+              {formatCurrencyARS(exchangeRateBlueBuy!, true)}
             </td>
           </tr>
         </tbody>

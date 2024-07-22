@@ -1,14 +1,20 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect, useContext } from "react";
 import { formatCurrencyARS, formatCurrencyUSD } from "../utils/format_currency";
 import { Currency } from "../models/Currency"; // Adjust the import path as needed
+import { ExchangeRateContext } from "@/contexts/ExhangeRateContext";
 
 const PaymentSplitter: React.FC = () => {
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const context = useContext(ExchangeRateContext);
 
-  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
+  if (!context) {
+    throw new Error("PaymentSplitter must be used within a ValueAvgProvider");
+  }
+
+  const { exchangeRateBlueAvg } = context;
+
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Inputs
   const [totalPaymentARSInput, setTotalPaymentARSInput] = useState<
@@ -28,34 +34,17 @@ const PaymentSplitter: React.FC = () => {
   const [remainingArsPayment, setRemainingArsPayment] =
     useState<Currency | null>(null);
 
-  // Fetch current ARS exchange rate
-  useEffect(() => {
-    const fetchExchangeRate = async () => {
-      try {
-        const response = await axios.get(
-          "https://api.bluelytics.com.ar/v2/latest"
-        );
-        console.log("Ran fetchExchangeRate()");
-        setExchangeRate(response.data.blue.value_avg);
-      } catch (error) {
-        console.error("Error fetching value_avg:", error);
-      }
-    };
-
-    fetchExchangeRate();
-  }, []);
-
   const handleTotalPaymentChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const inputValue = event.target.value;
     setTotalPaymentARSInput(inputValue);
 
-    if (exchangeRate !== null) {
+    if (exchangeRateBlueAvg !== null) {
       const totalPaymentARSInputParsed = parseFloat(inputValue);
 
       setTotalPayment(
-        new Currency(exchangeRate, {
+        new Currency(exchangeRateBlueAvg, {
           ars: totalPaymentARSInputParsed,
         })
       );
@@ -77,9 +66,9 @@ const PaymentSplitter: React.FC = () => {
     setErrorMessage(null);
     setMaxFirstPaymentARSInput(inputValue);
 
-    if (exchangeRate !== null) {
+    if (exchangeRateBlueAvg !== null) {
       setFirstPayment(
-        new Currency(exchangeRate, {
+        new Currency(exchangeRateBlueAvg, {
           ars: maxFirstPaymentARSInputParsed,
         })
       );
@@ -99,7 +88,7 @@ const PaymentSplitter: React.FC = () => {
   }, [maxFirstPaymentARSInput]);
 
   useEffect(() => {
-    if (totalPayment !== null && exchangeRate !== null) {
+    if (totalPayment !== null && exchangeRateBlueAvg !== null) {
       let remaining: number;
       if (firstPaymentExists) {
         remaining = totalPayment.valueARS - firstPayment!.valueARS;
@@ -108,20 +97,20 @@ const PaymentSplitter: React.FC = () => {
       }
 
       setRemainingAfterFirstPayment(
-        new Currency(exchangeRate, {
+        new Currency(exchangeRateBlueAvg, {
           ars: remaining,
         })
       );
     }
-  }, [firstPaymentExists, firstPayment, totalPayment, exchangeRate]);
+  }, [firstPaymentExists, firstPayment, totalPayment, exchangeRateBlueAvg]);
 
   useEffect(() => {
-    if (remainingAfterFirstPayment !== null && exchangeRate !== null) {
+    if (remainingAfterFirstPayment !== null && exchangeRateBlueAvg !== null) {
       console.log(
         "remainingAfterFirstPayment: " + remainingAfterFirstPayment!.valueARS
       );
       setUsdPayment(
-        new Currency(exchangeRate, {
+        new Currency(exchangeRateBlueAvg, {
           usd: Math.floor(remainingAfterFirstPayment.valueUSD / 100) * 100,
         })
       );
@@ -132,12 +121,12 @@ const PaymentSplitter: React.FC = () => {
     if (
       usdPayment !== null &&
       remainingAfterFirstPayment !== null &&
-      exchangeRate !== null
+      exchangeRateBlueAvg !== null
     ) {
       console.log("usdPayment: " + usdPayment!.valueUSD);
 
       setRemainingArsPayment(
-        new Currency(exchangeRate, {
+        new Currency(exchangeRateBlueAvg, {
           ars: remainingAfterFirstPayment.valueARS - usdPayment.valueARS,
         })
       );
