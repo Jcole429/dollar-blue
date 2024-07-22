@@ -123,7 +123,7 @@ const PaymentSplitter: React.FC = () => {
   }, [usdPayment]);
 
   return (
-    <div className="p-4 w-[800px]">
+    <div className="p-4 m-4 w-[800px] border">
       <h2 className="text-2xl">Payment Splitter</h2>
       <div className="flex">
         <div className="mb-4 mt-4 mr-1 p-4 border rounded basis-0">
