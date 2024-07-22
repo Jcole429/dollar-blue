@@ -46,7 +46,11 @@ const LatestRateDisplay: React.FC = () => {
         </tbody>
       </table>
       <p>Last updated: {exchangeRateTimeSinceLastUpdate}</p>
-      <p>{formatDate(exchangeRateLastUpdated!)}</p>
+      <p>
+        {exchangeRateLastUpdated !== null
+          ? formatDate(exchangeRateLastUpdated)
+          : ""}
+      </p>
     </div>
   );
 };
