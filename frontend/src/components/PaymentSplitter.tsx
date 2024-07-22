@@ -136,6 +136,19 @@ const PaymentSplitter: React.FC = () => {
   return (
     <div className="p-2 m-2 border">
       <h2 className="text-2xl">Payment Splitter</h2>
+      {/* <p>Easily split payments between ARS and USD.</p> */}
+      <p>
+        Calculates the maximum amount of USD you can pay in increments of $100
+        and displays the remaining amount owed in ARS.
+      </p>
+      <h3 className="text-xl pt-2">Instructions:</h3>
+      <ol className="list-decimal list-inside">
+        <li>Enter the total payment amount in ARS.</li>
+        <li>
+          Optionally, enter an initial payment in ARS before calculating the USD
+          payment.
+        </li>
+      </ol>
       <div className="flex">
         <div className="flex-auto mb-4 mt-4 mr-1 p-4 border rounded basis-0">
           <label className="block mb-1">Total Payment (ARS)</label>
