@@ -21,7 +21,7 @@ const LatestRateDisplay: React.FC = () => {
   } = context;
 
   return (
-    <div className="p-4 m-4 w-[800px] border">
+    <div className="p-4 m-4 border">
       <h2 className="text-2xl">Latest ARS to USD Exchange Rate</h2>
       <table className="mt-4 border-collapse border border-gray-200">
         <thead>

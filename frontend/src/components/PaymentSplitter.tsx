@@ -134,7 +134,7 @@ const PaymentSplitter: React.FC = () => {
   }, [usdPayment]);
 
   return (
-    <div className="p-4 m-4 w-[800px] border">
+    <div className="p-4 m-4 border">
       <h2 className="text-2xl">Payment Splitter</h2>
       <div className="flex">
         <div className="mb-4 mt-4 mr-1 p-4 border rounded basis-0">
@@ -159,10 +159,10 @@ const PaymentSplitter: React.FC = () => {
           {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
         </div>
       </div>
-      <table className="min-w-full border-collapse border border-gray-200">
+      <table className="border-collapse border border-gray-200">
         <thead>
           <tr>
-            <th className="border border-gray-200 px-2 py-1">Transaction</th>
+            <th className="border border-gray-200 px-2 py-1">Payment</th>
             <th className="border border-gray-200 px-2 py-1">Currency</th>
             <th className="border border-gray-200 px-2 py-1">Value ARS</th>
             <th className="border border-gray-200 px-2 py-1">Value USD</th>
