@@ -2,6 +2,7 @@ import ExchangeRatesTable from "../components/ExchangeRatesTable";
 import Graph from "../components/Graph";
 import LatestRate from "@/components/LatestRate";
 import Converter from "@/components/Converter";
+import PaymentSplitter from "@/components/PaymentSplitter";
 
 export default function Home() {
   return (
@@ -11,6 +12,7 @@ export default function Home() {
       </h1>
       <LatestRate />
       <Converter />
+      <PaymentSplitter />
       {/* <ExchangeRatesTable /> */}
       {/* <Graph /> */}
     </div>
