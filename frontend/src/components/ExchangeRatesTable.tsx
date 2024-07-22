@@ -34,7 +34,7 @@ const ExchangeRatesTable: React.FC = () => {
   }
 
   return (
-    <div className="w-40 pt-5">
+    <div className="w-60 p-4">
       <h2 className="text-2xl">Last 5 Days</h2>
       <table className="min-w-full border-collapse border border-gray-200">
         <thead>
