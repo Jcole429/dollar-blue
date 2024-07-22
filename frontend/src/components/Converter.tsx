@@ -64,7 +64,7 @@ const Converter: React.FC = () => {
     <div className="p-4">
       <h2 className="text-2xl">Currency Converter</h2>
       <div className="flex">
-        <div className="m-4 p-4 border rounded basis-0">
+        <div className="mt-4 mr-1 p-4 border rounded basis-0">
           <h3>{"USD -> ARS"}</h3>
           <input
             type="number"
@@ -75,7 +75,7 @@ const Converter: React.FC = () => {
           />
           <p>ARS: {arsAmount !== null ? formatCurrencyARS(arsAmount) : ""}</p>
         </div>
-        <div className="m-4 p-4 border rounded">
+        <div className="mt-4 ml-1 p-4 border rounded basis-0">
           <h3>{"ARS -> USD"}</h3>
           <input
             type="number"
