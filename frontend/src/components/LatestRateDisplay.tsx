@@ -22,7 +22,7 @@ const LatestRateDisplay: React.FC = () => {
 
   return (
     <div className="section row border mb-2 mx-0">
-      <div className="col">
+      <div className="col p-2">
         <div className="row">
           <div className="col">
             <h2 className="pt-2">Latest ARS to USD Exchange Rate</h2>
@@ -33,26 +33,26 @@ const LatestRateDisplay: React.FC = () => {
             <table className="table mb-0 text-center">
               <thead>
                 <tr>
-                  <th scope="col" className="border px-2 py-1">
+                  <th scope="col" className="border py-1">
                     Average
                   </th>
-                  <th scope="col" className="border px-2 py-1">
+                  <th scope="col" className="border py-1">
                     Sell
                   </th>
-                  <th scope="col" className="border px-2 py-1">
+                  <th scope="col" className="border py-1">
                     Buy
                   </th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="border px-2 py-2">
+                  <td className="border py-2">
                     {formatCurrencyARS(exchangeRateBlueAvg!, true)}
                   </td>
-                  <td className="border px-2 py-2">
+                  <td className="border py-2">
                     {formatCurrencyARS(exchangeRateBlueSell!, true)}
                   </td>
-                  <td className="border px-2 py-2">
+                  <td className="border py-2">
                     {formatCurrencyARS(exchangeRateBlueBuy!, true)}
                   </td>
                 </tr>
