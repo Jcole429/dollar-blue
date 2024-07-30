@@ -201,7 +201,7 @@ const PaymentSplitter: React.FC = () => {
           <div className="col-md border py-2">
             <div className="row pb-2">
               <div className="col">
-                <label className="">Total Payment (ARS)</label>
+                <label className="">Total Payment</label>
               </div>
             </div>
             <div className="row">
@@ -221,7 +221,7 @@ const PaymentSplitter: React.FC = () => {
           <div className="col-md border py-2">
             <div className="row pb-2">
               <div className="col">
-                <label className="">First Payment (ARS)</label>
+                <label className="">First Payment</label>
               </div>
             </div>
             <div className="row">
