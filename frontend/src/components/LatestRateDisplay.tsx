@@ -21,7 +21,7 @@ const LatestRateDisplay: React.FC = () => {
   } = context;
 
   return (
-    <div className="section row border mb-2 mx-0">
+    <div className="section row">
       <div className="col">
         <div className="row">
           <div className="col">

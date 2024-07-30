@@ -51,7 +51,7 @@ const Converter: React.FC = () => {
   };
 
   return (
-    <div className="section row border mb-2 mx-0">
+    <div className="section row mx-0">
       <div className="col">
         <div className="row">
           <div className="col">

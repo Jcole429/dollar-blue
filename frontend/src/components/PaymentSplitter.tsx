@@ -165,7 +165,7 @@ const PaymentSplitter: React.FC = () => {
   }, [usdPayment]);
 
   return (
-    <div className="section row border pb-2 mx-0">
+    <div className="section row pb-2 mx-0">
       <div className="col">
         <div className="row">
           <div className="col">
