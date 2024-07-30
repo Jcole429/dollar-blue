@@ -58,8 +58,8 @@ const Converter: React.FC = () => {
             <h2 className="pt-2">Currency Converter</h2>
           </div>
         </div>
-        <div className="row">
-          <div className="col border ms-2 me-1 mb-2">
+        <div className="row grid gap-2 p-2">
+          <div className="col-md border py-2">
             <div className="row pt-2">
               <div className="col">
                 <h5>{"USD -> ARS"}</h5>
@@ -77,7 +77,7 @@ const Converter: React.FC = () => {
                 />
               </div>
             </div>
-            <div className="row pb-2">
+            <div className="row">
               <div className="col input-group">
                 <span className="input-group-text">ARS</span>
                 <input
@@ -89,7 +89,7 @@ const Converter: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="col border ms-1 me-2 mb-2">
+          <div className="col-md border py-2">
             <div className="row pt-2">
               <div className="col">
                 <h5>{"ARS -> USD"}</h5>
@@ -107,7 +107,7 @@ const Converter: React.FC = () => {
                 />
               </div>
             </div>
-            <div className="row pb-2">
+            <div className="row">
               <div className="col input-group">
                 <span className="input-group-text">USD</span>
                 <input
