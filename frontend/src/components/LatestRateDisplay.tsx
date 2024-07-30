@@ -22,7 +22,7 @@ const LatestRateDisplay: React.FC = () => {
 
   return (
     <div className="section row border mb-2 mx-0">
-      <div className="col p-2">
+      <div className="col">
         <div className="row">
           <div className="col">
             <h2 className="pt-2">Latest ARS to USD Exchange Rate</h2>
@@ -65,7 +65,7 @@ const LatestRateDisplay: React.FC = () => {
             <p className="mb-0">
               Last updated: {exchangeRateTimeSinceLastUpdate}
             </p>
-            <p className="mb-2">
+            <p className="mb-1">
               {exchangeRateLastUpdated !== null
                 ? formatDate(exchangeRateLastUpdated)
                 : ""}
