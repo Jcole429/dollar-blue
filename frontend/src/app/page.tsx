@@ -5,9 +5,9 @@ import { ExchangeRateProvider } from "@/contexts/ExhangeRateContext";
 
 export default function Home() {
   return (
-    <div className="container mx-auto m-4" style={{ maxWidth: "800px" }}>
-      <div className="row pt-2">
-        <div className="col border mx-2">
+    <div className="container mx-auto" style={{ maxWidth: "800px" }}>
+      <div className="row">
+        <div className="col border m-2 p-2">
           <h1 className="p-2 mb-2">Dollar Blue</h1>
           <ExchangeRateProvider>
             <LatestRateDisplay />
