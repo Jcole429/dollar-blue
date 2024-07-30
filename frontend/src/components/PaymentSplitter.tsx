@@ -165,139 +165,185 @@ const PaymentSplitter: React.FC = () => {
   }, [usdPayment]);
 
   return (
-    <div className="p-2 m-2 border">
-      <h2 className="text-2xl">Payment Splitter</h2>
-      {/* <p>Easily split payments between ARS and USD.</p> */}
-      <p>
-        Calculates the maximum amount of USD you can pay in increments of $100
-        and displays the remaining amount owed in ARS.
-      </p>
-      <h3 className="text-xl pt-2">Instructions:</h3>
-      <ol className="list-decimal list-inside">
-        <li>Enter the total payment amount in ARS.</li>
-        <li>
-          Optionally, enter an initial payment in ARS before calculating the USD
-          payment.
-        </li>
-        <li>Optionally, enter the max amount of USD to use.</li>
-      </ol>
-      <div className="flex">
-        <div className="flex-auto mb-4 mt-4 mr-1 p-4 border rounded basis-0">
-          <label className="block mb-1">Total Payment (ARS)</label>
-          <input
-            type="number"
-            value={totalPaymentARSInput}
-            onChange={handleTotalPaymentChange}
-            placeholder="$ARS"
-            className="w-full border border-gray-300 px-4 py-2"
-          />
+    <div className="container border">
+      <div className="row">
+        <div className="col">
+          <h2 className="pt-2">Payment Splitter</h2>
         </div>
-        <div className="flex-auto mb-4 mt-4 ml-1 mr-1 p-4 border rounded basis-0">
-          <label className="block mb-1">First Payment (ARS)</label>
-          <input
-            type="number"
-            value={maxFirstPaymentARSInput}
-            onChange={handleMaxFirstPaymentChange}
-            placeholder="$ARS"
-            className="w-full border border-gray-300 px-4 py-2"
-          />
-          {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
+      </div>
+      <div className="row">
+        <div className="col">
+          <p>
+            Calculates the maximum amount of USD you can pay in increments of
+            $100 and displays the remaining amount owed in ARS.
+          </p>
         </div>
-        <div className="flex flex-auto flex-col justify-between mb-4 mt-4 ml-1 p-4 border rounded basis-0">
-          <label className="block mb-1">USD Limit</label>
-          {/* <div className="flex-1"></div> */}
-          <div className="">
-            <input
-              type="number"
-              value={usdLimitInput}
-              onChange={handleUsdLimitChange}
-              placeholder="$USD"
-              className="w-full border border-gray-300 px-4 py-2"
-            />
+      </div>
+      <div className="row pt-2">
+        <div className="col">
+          <h5 className="">Instructions:</h5>
+        </div>
+      </div>
+      <div className="row">
+        <div className="col">
+          <ol className="list-decimal list-inside">
+            <li>Enter the total payment amount in ARS.</li>
+            <li>
+              Optionally, enter an initial payment in ARS before calculating the
+              USD payment.
+            </li>
+            <li>Optionally, enter the max amount of USD to use.</li>
+          </ol>
+        </div>
+      </div>
+      <div className="row grid gap-2 px-2">
+        <div className="col-md border py-2">
+          <div className="row pb-2">
+            <div className="col">
+              <label className="">Total Payment (ARS)</label>
+            </div>
+          </div>
+          <div className="row">
+            <div className="col input-group">
+              <span className="input-group-text">ARS</span>
+
+              <input
+                type="text"
+                value={totalPaymentARSInput}
+                onChange={handleTotalPaymentChange}
+                placeholder=""
+                className="form-control border"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="col-md border py-2">
+          <div className="row pb-2">
+            <div className="col">
+              <label className="">First Payment (ARS)</label>
+            </div>
+          </div>
+          <div className="row">
+            <div className="col input-group">
+              <span className="input-group-text">ARS</span>
+              <input
+                type="text"
+                value={maxFirstPaymentARSInput}
+                onChange={handleMaxFirstPaymentChange}
+                placeholder=""
+                className="form-control border"
+              />
+            </div>
+          </div>
+          <div className="row">
+            <div className="col">
+              {errorMessage && (
+                <p className="text-red-500 mt-2">{errorMessage}</p>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="col-md border py-2">
+          <div className="row pb-2">
+            <div className="col">
+              <label className="">USD Limit</label>
+            </div>
+          </div>
+          <div className="row">
+            <div className="col input-group">
+              <span className="input-group-text">USD</span>
+              <input
+                type="text"
+                value={usdLimitInput}
+                onChange={handleUsdLimitChange}
+                placeholder=""
+                className="form-control border"
+              />
+            </div>
           </div>
         </div>
       </div>
-      <table className="w-full border-collapse border border-gray-200">
-        <thead>
-          <tr>
-            <th className="border border-gray-200 px-2 py-1 flex-initial w-10">
-              Payment
-            </th>
-            <th className="border border-gray-200 px-2 py-1 flex-auto">
-              Value ARS
-            </th>
-            <th className="border border-gray-200 px-2 py-1 flex-auto">
-              Value USD
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {firstPaymentExists && (
-            <tr>
-              <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-initial w-10">
-                1
-              </td>
-              <td className="border border-gray-200 px-2 py-2 whitespace-nowrap underline flex-auto">
-                {firstPayment !== null
-                  ? formatCurrencyARS(firstPayment.valueARS, true)
-                  : ""}
-              </td>
-              <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-auto">
-                {firstPayment !== null
-                  ? formatCurrencyUSD(firstPayment.valueUSD)
-                  : ""}
-              </td>
-            </tr>
-          )}
-          <tr>
-            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-initial w-10">
-              {firstPaymentExists && 2}
-              {!firstPaymentExists && 1}
-            </td>
-            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-auto">
-              {usdPayment !== null
-                ? formatCurrencyARS(usdPayment.valueARS, true)
-                : ""}
-            </td>
-            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap underline flex-auto">
-              {usdPayment !== null
-                ? formatCurrencyUSD(usdPayment.valueUSD)
-                : ""}
-            </td>
-          </tr>
-          <tr>
-            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-initial w-10">
-              {firstPaymentExists && 3}
-              {!firstPaymentExists && 2}
-            </td>
-            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap underline flex-auto">
-              {remainingArsPayment !== null
-                ? formatCurrencyARS(remainingArsPayment.valueARS, true)
-                : ""}
-            </td>
-            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-auto">
-              {remainingArsPayment !== null
-                ? formatCurrencyUSD(remainingArsPayment.valueUSD)
-                : ""}
-            </td>
-          </tr>
-          <tr className="font-bold">
-            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-initial w-10">
-              Total
-            </td>
-            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-auto">
-              {totalPayment !== null
-                ? formatCurrencyARS(totalPayment.valueARS, true)
-                : ""}
-            </td>
-            <td className="border border-gray-200 px-2 py-2 whitespace-nowrap flex-auto">
-              {totalPayment !== null
-                ? formatCurrencyUSD(totalPayment.valueUSD)
-                : ""}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="row pt-2">
+        <div className="col px-2">
+          <table className="table table-bordered text-center">
+            <thead>
+              <tr>
+                <th scope="col" className="col-1">
+                  Payment
+                </th>
+                <th scope="col" className="col">
+                  Value ARS
+                </th>
+                <th scope="col" className="col">
+                  Value USD
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {firstPaymentExists && (
+                <tr>
+                  <td className="">1</td>
+                  <td className="table-active">
+                    {firstPayment !== null
+                      ? formatCurrencyARS(firstPayment.valueARS, true)
+                      : ""}
+                  </td>
+                  <td className="">
+                    {firstPayment !== null
+                      ? formatCurrencyUSD(firstPayment.valueUSD)
+                      : ""}
+                  </td>
+                </tr>
+              )}
+              <tr>
+                <td className="">
+                  {firstPaymentExists && 2}
+                  {!firstPaymentExists && 1}
+                </td>
+                <td className="">
+                  {usdPayment !== null
+                    ? formatCurrencyARS(usdPayment.valueARS, true)
+                    : ""}
+                </td>
+                <td className="table-active">
+                  {usdPayment !== null
+                    ? formatCurrencyUSD(usdPayment.valueUSD)
+                    : ""}
+                </td>
+              </tr>
+              <tr>
+                <td className="">
+                  {firstPaymentExists && 3}
+                  {!firstPaymentExists && 2}
+                </td>
+                <td className="table-active">
+                  {remainingArsPayment !== null
+                    ? formatCurrencyARS(remainingArsPayment.valueARS, true)
+                    : ""}
+                </td>
+                <td className="">
+                  {remainingArsPayment !== null
+                    ? formatCurrencyUSD(remainingArsPayment.valueUSD)
+                    : ""}
+                </td>
+              </tr>
+              <tr className="fw-bold">
+                <td className="">Total</td>
+                <td className="">
+                  {totalPayment !== null
+                    ? formatCurrencyARS(totalPayment.valueARS, true)
+                    : ""}
+                </td>
+                <td className="">
+                  {totalPayment !== null
+                    ? formatCurrencyUSD(totalPayment.valueUSD)
+                    : ""}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
