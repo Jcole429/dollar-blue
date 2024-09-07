@@ -36,17 +36,21 @@ const PaymentSplitter: React.FC = () => {
   const [remainingArsPayment, setRemainingArsPayment] =
     useState<Currency | null>(null);
 
+  const [rateOverrideInput, setRateOverrideInput] = useState<string>("");
+
+  const [activeExchangeRate, setActiveExchangeRate] = useState<number>(0);
+
   const handleTotalPaymentChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const inputValue = event.target.value;
     setTotalPaymentARSInput(inputValue);
 
-    if (exchangeRateBlueAvg !== null) {
+    if (activeExchangeRate !== null) {
       const totalPaymentARSInputParsed = parseFloat(inputValue);
 
       setTotalPayment(
-        new Currency(exchangeRateBlueAvg, {
+        new Currency(activeExchangeRate, {
           ars: totalPaymentARSInputParsed,
         })
       );
@@ -68,14 +72,15 @@ const PaymentSplitter: React.FC = () => {
     setErrorMessage(null);
     setMaxFirstPaymentARSInput(inputValue);
 
-    if (exchangeRateBlueAvg !== null) {
+    if (activeExchangeRate !== null) {
       setFirstPayment(
-        new Currency(exchangeRateBlueAvg, {
+        new Currency(activeExchangeRate, {
           ars: maxFirstPaymentARSInputParsed,
         })
       );
     }
   };
+
   const handleUsdLimitChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.target.value;
     const inputValueParsed = parseFloat(inputValue);
@@ -87,13 +92,20 @@ const PaymentSplitter: React.FC = () => {
       return;
     }
 
-    if (exchangeRateBlueAvg !== null) {
+    if (activeExchangeRate !== null) {
       setUsdLimit(
-        new Currency(exchangeRateBlueAvg, {
+        new Currency(activeExchangeRate, {
           usd: inputValueParsed,
         })
       );
     }
+  };
+
+  const handleRateOverrideChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = parseFloat(event.target.value);
+    setRateOverrideInput(event.target.value);
   };
 
   useEffect(() => {
@@ -109,7 +121,7 @@ const PaymentSplitter: React.FC = () => {
   }, [maxFirstPaymentARSInput]);
 
   useEffect(() => {
-    if (totalPayment !== null && exchangeRateBlueAvg !== null) {
+    if (totalPayment !== null && activeExchangeRate !== null) {
       let remaining: number;
       if (firstPaymentExists) {
         remaining = totalPayment.valueARS - firstPayment!.valueARS;
@@ -118,7 +130,7 @@ const PaymentSplitter: React.FC = () => {
       }
 
       setRemainingAfterFirstPayment(
-        new Currency(exchangeRateBlueAvg, {
+        new Currency(activeExchangeRate, {
           ars: remaining,
         })
       );
@@ -127,12 +139,12 @@ const PaymentSplitter: React.FC = () => {
     firstPaymentExists,
     firstPayment,
     totalPayment,
-    exchangeRateBlueAvg,
+    activeExchangeRate,
     usdLimit,
   ]);
 
   useEffect(() => {
-    if (remainingAfterFirstPayment !== null && exchangeRateBlueAvg !== null) {
+    if (remainingAfterFirstPayment !== null && activeExchangeRate !== null) {
       let usdPayment = 0;
       let maxUsdPossible =
         Math.floor(remainingAfterFirstPayment.valueUSD / 100) * 100;
@@ -143,7 +155,7 @@ const PaymentSplitter: React.FC = () => {
         usdPayment = maxUsdPossible;
       }
       setUsdPayment(
-        new Currency(exchangeRateBlueAvg, {
+        new Currency(activeExchangeRate, {
           usd: usdPayment,
         })
       );
@@ -154,15 +166,50 @@ const PaymentSplitter: React.FC = () => {
     if (
       usdPayment !== null &&
       remainingAfterFirstPayment !== null &&
-      exchangeRateBlueAvg !== null
+      activeExchangeRate !== null
     ) {
       setRemainingArsPayment(
-        new Currency(exchangeRateBlueAvg, {
+        new Currency(activeExchangeRate, {
           ars: remainingAfterFirstPayment.valueARS - usdPayment.valueARS,
         })
       );
     }
   }, [usdPayment]);
+
+  useEffect(() => {
+    if (exchangeRateBlueAvg !== null) {
+      setActiveExchangeRate(exchangeRateBlueAvg);
+      if (totalPaymentARSInput !== null) {
+        setTotalPayment(
+          new Currency(activeExchangeRate, {
+            ars: parseFloat(totalPaymentARSInput.toString()),
+          })
+        );
+      }
+    }
+  }, [exchangeRateBlueAvg]);
+
+  useEffect(() => {
+    if (rateOverrideInput !== "" && rateOverrideInput !== null) {
+      setActiveExchangeRate(parseFloat(rateOverrideInput));
+      if (totalPaymentARSInput !== null) {
+        setTotalPayment(
+          new Currency(parseFloat(rateOverrideInput), {
+            ars: parseFloat(totalPaymentARSInput.toString()),
+          })
+        );
+      }
+    } else if (exchangeRateBlueAvg !== null) {
+      setActiveExchangeRate(exchangeRateBlueAvg);
+      if (totalPaymentARSInput !== null) {
+        setTotalPayment(
+          new Currency(exchangeRateBlueAvg, {
+            ars: parseFloat(totalPaymentARSInput.toString()),
+          })
+        );
+      }
+    }
+  }, [rateOverrideInput]);
 
   return (
     <div className="section row border pb-2 mx-0">
@@ -196,6 +243,20 @@ const PaymentSplitter: React.FC = () => {
               <li>Optionally, enter the max amount of USD to use.</li>
             </ol>
           </div>
+        </div>
+        <div className="row pb-2">
+          <div>Rate override</div>
+          <div className="col input-group">
+            <span className="input-group-text">ARS</span>
+            <input
+              type="text"
+              value={rateOverrideInput}
+              onChange={handleRateOverrideChange}
+              placeholder=""
+              className="form-control border"
+            />
+          </div>
+          <div className="col"></div>
         </div>
         <div className="row grid gap-2 px-2">
           <div className="col-md border py-2">

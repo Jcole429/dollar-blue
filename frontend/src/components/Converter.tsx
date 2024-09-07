@@ -17,6 +17,7 @@ const Converter: React.FC = () => {
   const [arsAmount, setArsAmount] = useState<number | null>(null);
   const [arsToUsdAmount, setArsToUsdAmount] = useState<number | string>("");
   const [usdAmount, setUsdAmount] = useState<number | null>(null);
+  const [rateOverrideInput, setRateOverrideInput] = useState<string>("");
 
   useEffect(() => {
     if (exchangeRateBlueAvg !== null && dollarAmount !== "") {
@@ -24,11 +25,15 @@ const Converter: React.FC = () => {
         typeof dollarAmount === "number"
           ? dollarAmount
           : parseFloat(dollarAmount);
-      setArsAmount(amount * exchangeRateBlueAvg);
+      if (rateOverrideInput !== "") {
+        setArsAmount(amount * parseFloat(rateOverrideInput));
+      } else {
+        setArsAmount(amount * exchangeRateBlueAvg);
+      }
     } else {
       setArsAmount(null);
     }
-  }, [dollarAmount, exchangeRateBlueAvg]);
+  }, [dollarAmount, exchangeRateBlueAvg, rateOverrideInput]);
 
   useEffect(() => {
     if (exchangeRateBlueAvg !== null && arsToUsdAmount !== "") {
@@ -36,11 +41,15 @@ const Converter: React.FC = () => {
         typeof arsToUsdAmount === "number"
           ? arsToUsdAmount
           : parseFloat(arsToUsdAmount);
-      setUsdAmount(amount / exchangeRateBlueAvg);
+      if (rateOverrideInput !== "") {
+        setUsdAmount(amount / parseFloat(rateOverrideInput));
+      } else {
+        setUsdAmount(amount / exchangeRateBlueAvg);
+      }
     } else {
       setUsdAmount(null);
     }
-  }, [arsToUsdAmount, exchangeRateBlueAvg]);
+  }, [arsToUsdAmount, exchangeRateBlueAvg, rateOverrideInput]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDollarAmount(event.target.value);
@@ -50,6 +59,14 @@ const Converter: React.FC = () => {
     setArsToUsdAmount(event.target.value);
   };
 
+  const handleRateOverrideChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = parseFloat(event.target.value);
+    console.log(value);
+    setRateOverrideInput(event.target.value);
+  };
+
   return (
     <div className="section row border mb-2 mx-0">
       <div className="col">
@@ -57,6 +74,20 @@ const Converter: React.FC = () => {
           <div className="col">
             <h2 className="pt-2">Currency Converter</h2>
           </div>
+        </div>
+        <div className="row">
+          <div>Rate override</div>
+          <div className="col input-group">
+            <span className="input-group-text">ARS</span>
+            <input
+              type="text"
+              value={rateOverrideInput}
+              onChange={handleRateOverrideChange}
+              placeholder=""
+              className="form-control border"
+            />
+          </div>
+          <div className="col"></div>
         </div>
         <div className="row grid gap-2 p-2">
           <div className="col-md border py-2">
