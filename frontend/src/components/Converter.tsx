@@ -13,57 +13,73 @@ const Converter: React.FC = () => {
 
   const { exchangeRateBlueAvg } = context;
 
-  const [dollarAmount, setDollarAmount] = useState<number | string>("");
-  const [arsAmount, setArsAmount] = useState<number | null>(null);
-  const [arsToUsdAmount, setArsToUsdAmount] = useState<number | string>("");
-  const [usdAmount, setUsdAmount] = useState<number | null>(null);
+  const [usdToArsInput, setUsdToArsInput] = useState<string>("");
+  const [usdToArsValue, setUsdToArsValue] = useState<number | null>(null);
+
+  const [arsToUsdInput, setArsToUsdInput] = useState<number | string>("");
+  const [arsToUsdValue, setArsToUsdValue] = useState<number | null>(null);
+
   const [rateOverrideInput, setRateOverrideInput] = useState<string>("");
+  const [rateOverrideValue, setRateOverrideValue] = useState<number | null>(
+    null
+  );
+
+  const [arsAmountDisplay, setArsAmountDisplay] = useState<string>("");
+  const [usdAmountDisplay, setUsdAmountDisplay] = useState<string>("");
 
   useEffect(() => {
-    if (exchangeRateBlueAvg !== null && dollarAmount !== "") {
-      const amount =
-        typeof dollarAmount === "number"
-          ? dollarAmount
-          : parseFloat(dollarAmount);
-      if (rateOverrideInput !== "") {
-        setArsAmount(amount * parseFloat(rateOverrideInput));
+    if (exchangeRateBlueAvg !== null && usdToArsValue !== null) {
+      if (rateOverrideValue !== null) {
+        setArsAmountDisplay(
+          formatCurrencyARS(usdToArsValue * rateOverrideValue)
+        );
       } else {
-        setArsAmount(amount * exchangeRateBlueAvg);
+        setArsAmountDisplay(
+          formatCurrencyARS(usdToArsValue * exchangeRateBlueAvg)
+        );
       }
     } else {
-      setArsAmount(null);
+      setArsAmountDisplay("");
     }
-  }, [dollarAmount, exchangeRateBlueAvg, rateOverrideInput]);
+  }, [usdToArsValue, exchangeRateBlueAvg, rateOverrideValue]);
 
   useEffect(() => {
-    if (exchangeRateBlueAvg !== null && arsToUsdAmount !== "") {
-      const amount =
-        typeof arsToUsdAmount === "number"
-          ? arsToUsdAmount
-          : parseFloat(arsToUsdAmount);
-      if (rateOverrideInput !== "") {
-        setUsdAmount(amount / parseFloat(rateOverrideInput));
+    if (exchangeRateBlueAvg !== null && arsToUsdValue !== null) {
+      if (rateOverrideValue !== null) {
+        setUsdAmountDisplay(
+          formatCurrencyUSD(arsToUsdValue / rateOverrideValue)
+        );
       } else {
-        setUsdAmount(amount / exchangeRateBlueAvg);
+        setUsdAmountDisplay(
+          formatCurrencyUSD(arsToUsdValue / exchangeRateBlueAvg)
+        );
       }
     } else {
-      setUsdAmount(null);
+      setUsdAmountDisplay("");
     }
-  }, [arsToUsdAmount, exchangeRateBlueAvg, rateOverrideInput]);
+  }, [arsToUsdValue, exchangeRateBlueAvg, rateOverrideValue]);
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDollarAmount(event.target.value);
+  const handleUsdToArsInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = parseFloat(event.target.value.replace(/\D/g, "")) || null;
+    setUsdToArsValue(value);
+    setUsdToArsInput(event.target.value);
   };
 
-  const handleArsInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setArsToUsdAmount(event.target.value);
+  const handleArsToUsdInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = parseFloat(event.target.value.replace(/\D/g, "")) || null;
+    setArsToUsdValue(value);
+    setArsToUsdInput(event.target.value);
   };
 
   const handleRateOverrideChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const value = parseFloat(event.target.value);
-    console.log(value);
+    const value = parseFloat(event.target.value.replace(/\D/g, "")) || null;
+    setRateOverrideValue(value);
     setRateOverrideInput(event.target.value);
   };
 
@@ -101,8 +117,8 @@ const Converter: React.FC = () => {
                 <span className="input-group-text">USD</span>
                 <input
                   type="text"
-                  value={dollarAmount}
-                  onChange={handleInputChange}
+                  value={usdToArsInput}
+                  onChange={handleUsdToArsInputChange}
                   placeholder=""
                   className="form-control border"
                 />
@@ -114,7 +130,7 @@ const Converter: React.FC = () => {
                 <input
                   disabled
                   type="text"
-                  value={arsAmount !== null ? formatCurrencyARS(arsAmount) : ""}
+                  value={arsAmountDisplay}
                   className="form-control border"
                 />
               </div>
@@ -131,8 +147,8 @@ const Converter: React.FC = () => {
                 <span className="input-group-text">ARS</span>
                 <input
                   type="text"
-                  value={arsToUsdAmount}
-                  onChange={handleArsInputChange}
+                  value={arsToUsdInput}
+                  onChange={handleArsToUsdInputChange}
                   placeholder=""
                   className="form-control border"
                 />
@@ -144,7 +160,7 @@ const Converter: React.FC = () => {
                 <input
                   disabled
                   type="text"
-                  value={usdAmount !== null ? formatCurrencyUSD(usdAmount) : ""}
+                  value={usdAmountDisplay}
                   placeholder=""
                   className="form-control border"
                 />
