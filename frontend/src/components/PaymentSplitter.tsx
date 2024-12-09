@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { formatCurrencyARS, formatCurrencyUSD } from "../utils/format_currency";
 import { Currency } from "../models/Currency"; // Adjust the import path as needed
-import { ExchangeRateContext } from "@/contexts/ExhangeRateContext";
+import { ExchangeRateContext } from "@/contexts/ExchangeRateContext";
 
 const PaymentSplitter: React.FC = () => {
   const context = useContext(ExchangeRateContext);

@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { formatCurrencyARS } from "../utils/format_currency";
 import { formatDate } from "@/utils/format_date";
-import { ExchangeRateContext } from "@/contexts/ExhangeRateContext";
+import { ExchangeRateContext } from "@/contexts/ExchangeRateContext";
 
 const LatestRateDisplay: React.FC = () => {
   const context = useContext(ExchangeRateContext);

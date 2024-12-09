@@ -1,7 +1,7 @@
 import LatestRateDisplay from "@/components/LatestRateDisplay";
 import Converter from "@/components/Converter";
 import PaymentSplitter from "@/components/PaymentSplitter";
-import { ExchangeRateProvider } from "@/contexts/ExhangeRateContext";
+import { ExchangeRateProvider } from "@/contexts/ExchangeRateContext";
 
 export default function Home() {
   return (
