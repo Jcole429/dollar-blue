@@ -40,6 +40,19 @@ const PaymentSplitter: React.FC = () => {
 
   const [activeExchangeRate, setActiveExchangeRate] = useState<number>(0);
 
+  // Labels
+  const [payment1ArsLabel, setPayment1ArsLabel] = useState<string>("");
+  const [payment1UsdLabel, setPayment1UsdLabel] = useState<string>("");
+
+  const [payment2ArsLabel, setPayment2ArsLabel] = useState<string>("");
+  const [payment2UsdLabel, setPayment2UsdLabel] = useState<string>("");
+
+  const [payment3ArsLabel, setPayment3ArsLabel] = useState<string>("");
+  const [payment3UsdLabel, setPayment3UsdLabel] = useState<string>("");
+
+  const [paymentTotalArsLabel, setPaymentTotalArsLabel] = useState<string>("");
+  const [paymentTotalUsdLabel, setPaymentTotalUsdLabel] = useState<string>("");
+
   const handleTotalPaymentChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -211,6 +224,50 @@ const PaymentSplitter: React.FC = () => {
     }
   }, [rateOverrideInput]);
 
+  useEffect(() => {
+    if (firstPayment) {
+      setPayment1ArsLabel(formatCurrencyARS(firstPayment.valueARS));
+      setPayment1UsdLabel(formatCurrencyUSD(firstPayment.valueUSD));
+    } else {
+      setPayment1ArsLabel("");
+      setPayment1UsdLabel("");
+    }
+  }, [firstPayment]);
+
+  useEffect(() => {
+    console.log("usdPayment: ", usdPayment);
+
+    if (usdPayment) {
+      console.log("Did fire");
+      setPayment2ArsLabel(formatCurrencyARS(usdPayment.valueARS));
+      setPayment2UsdLabel(formatCurrencyUSD(usdPayment.valueUSD));
+    } else {
+      console.log("Did not fire");
+      setPayment2ArsLabel("");
+      setPayment2UsdLabel("");
+    }
+  }, [usdPayment]);
+
+  useEffect(() => {
+    if (remainingArsPayment) {
+      setPayment3ArsLabel(formatCurrencyARS(remainingArsPayment.valueARS));
+      setPayment3UsdLabel(formatCurrencyUSD(remainingArsPayment.valueUSD));
+    } else {
+      setPayment3ArsLabel("");
+      setPayment3UsdLabel("");
+    }
+  }, [remainingArsPayment]);
+
+  useEffect(() => {
+    if (totalPayment) {
+      setPaymentTotalArsLabel(formatCurrencyARS(totalPayment.valueARS));
+      setPaymentTotalUsdLabel(formatCurrencyUSD(totalPayment.valueUSD));
+    } else {
+      setPaymentTotalArsLabel("");
+      setPaymentTotalUsdLabel("");
+    }
+  }, [totalPayment]);
+
   return (
     <div className="section row border pb-2 mx-0">
       <div className="col">
@@ -345,16 +402,8 @@ const PaymentSplitter: React.FC = () => {
                 {firstPaymentExists && (
                   <tr>
                     <td className="">1</td>
-                    <td className="table-active">
-                      {firstPayment !== null
-                        ? formatCurrencyARS(firstPayment.valueARS, true)
-                        : ""}
-                    </td>
-                    <td className="">
-                      {firstPayment !== null
-                        ? formatCurrencyUSD(firstPayment.valueUSD)
-                        : ""}
-                    </td>
+                    <td className="table-active">{payment1ArsLabel}</td>
+                    <td className="">{payment1UsdLabel}</td>
                   </tr>
                 )}
                 <tr>
@@ -362,45 +411,21 @@ const PaymentSplitter: React.FC = () => {
                     {firstPaymentExists && 2}
                     {!firstPaymentExists && 1}
                   </td>
-                  <td className="">
-                    {usdPayment !== null
-                      ? formatCurrencyARS(usdPayment.valueARS, true)
-                      : ""}
-                  </td>
-                  <td className="table-active">
-                    {usdPayment !== null
-                      ? formatCurrencyUSD(usdPayment.valueUSD)
-                      : ""}
-                  </td>
+                  <td className="">{payment2ArsLabel}</td>
+                  <td className="table-active">{payment2UsdLabel}</td>
                 </tr>
                 <tr>
                   <td className="">
                     {firstPaymentExists && 3}
                     {!firstPaymentExists && 2}
                   </td>
-                  <td className="table-active">
-                    {remainingArsPayment !== null
-                      ? formatCurrencyARS(remainingArsPayment.valueARS, true)
-                      : ""}
-                  </td>
-                  <td className="">
-                    {remainingArsPayment !== null
-                      ? formatCurrencyUSD(remainingArsPayment.valueUSD)
-                      : ""}
-                  </td>
+                  <td className="table-active">{payment3ArsLabel}</td>
+                  <td className="">{payment3UsdLabel}</td>
                 </tr>
                 <tr className="fw-bold">
                   <td className="">Total</td>
-                  <td className="">
-                    {totalPayment !== null
-                      ? formatCurrencyARS(totalPayment.valueARS, true)
-                      : ""}
-                  </td>
-                  <td className="">
-                    {totalPayment !== null
-                      ? formatCurrencyUSD(totalPayment.valueUSD)
-                      : ""}
-                  </td>
+                  <td className="">{paymentTotalArsLabel}</td>
+                  <td className="">{paymentTotalUsdLabel}</td>
                 </tr>
               </tbody>
             </table>
