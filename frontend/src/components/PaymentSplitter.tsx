@@ -225,7 +225,11 @@ const PaymentSplitter: React.FC = () => {
   }, [rateOverrideInput]);
 
   useEffect(() => {
-    if (firstPayment) {
+    if (
+      firstPayment &&
+      !Number.isNaN(firstPayment.valueARS) &&
+      !Number.isNaN(firstPayment.valueUSD)
+    ) {
       setPayment1ArsLabel(formatCurrencyARS(firstPayment.valueARS));
       setPayment1UsdLabel(formatCurrencyUSD(firstPayment.valueUSD));
     } else {
@@ -235,21 +239,25 @@ const PaymentSplitter: React.FC = () => {
   }, [firstPayment]);
 
   useEffect(() => {
-    console.log("usdPayment: ", usdPayment);
-
-    if (usdPayment) {
-      console.log("Did fire");
+    if (
+      usdPayment &&
+      !Number.isNaN(usdPayment.valueARS) &&
+      !Number.isNaN(usdPayment.valueUSD)
+    ) {
       setPayment2ArsLabel(formatCurrencyARS(usdPayment.valueARS));
       setPayment2UsdLabel(formatCurrencyUSD(usdPayment.valueUSD));
     } else {
-      console.log("Did not fire");
       setPayment2ArsLabel("");
       setPayment2UsdLabel("");
     }
   }, [usdPayment]);
 
   useEffect(() => {
-    if (remainingArsPayment) {
+    if (
+      remainingArsPayment &&
+      !Number.isNaN(remainingArsPayment.valueARS) &&
+      !Number.isNaN(remainingArsPayment.valueUSD)
+    ) {
       setPayment3ArsLabel(formatCurrencyARS(remainingArsPayment.valueARS));
       setPayment3UsdLabel(formatCurrencyUSD(remainingArsPayment.valueUSD));
     } else {
@@ -259,7 +267,11 @@ const PaymentSplitter: React.FC = () => {
   }, [remainingArsPayment]);
 
   useEffect(() => {
-    if (totalPayment) {
+    if (
+      totalPayment &&
+      !Number.isNaN(totalPayment.valueARS) &&
+      !Number.isNaN(totalPayment.valueUSD)
+    ) {
       setPaymentTotalArsLabel(formatCurrencyARS(totalPayment.valueARS));
       setPaymentTotalUsdLabel(formatCurrencyUSD(totalPayment.valueUSD));
     } else {
