@@ -8,8 +8,13 @@ interface ExchangeRateContextProps {
   exchangeRateBlueAvg: number | null;
   exchangeRateBlueBuy: number | null;
   exchangeRateBlueSell: number | null;
-  exchangeRateLastUpdated: Date | null;
-  exchangeRateTimeSinceLastUpdate: string | null;
+  exchangeRateBlueLastUpdated: Date | null;
+  exchangeRateBlueTimeSinceLastUpdate: string | null;
+  exchangeRateCryptoAvg: number | null;
+  exchangeRateCryptoBuy: number | null;
+  exchangeRateCryptoSell: number | null;
+  exchangeRateCryptoLastUpdated: Date | null;
+  exchangeRateCryptoTimeSinceLastUpdate: string | null;
 }
 
 export const ExchangeRateContext = createContext<
@@ -23,10 +28,12 @@ interface ExchangeRateProviderProps {
 export const ExchangeRateProvider: React.FC<ExchangeRateProviderProps> = ({
   children,
 }) => {
-  const [exchangeRateLastUpdated, setExchangeRateLastUpdated] =
+  const [exchangeRateBlueLastUpdated, setExchangeRateBlueLastUpdated] =
     useState<Date | null>(null);
-  const [exchangeRateTimeSinceLastUpdate, setExchangeRateTimeSinceLastUpdate] =
-    useState<string>("");
+  const [
+    exchangeRateBlueTimeSinceLastUpdate,
+    setExchangeRateBlueTimeSinceLastUpdate,
+  ] = useState<string>("");
   const [exchangeRateBlueAvg, setExchangeRateBlueAvg] = useState<number | null>(
     null
   );
@@ -37,44 +44,106 @@ export const ExchangeRateProvider: React.FC<ExchangeRateProviderProps> = ({
     number | null
   >(null);
 
+  const [exchangeRateCryptoLastUpdated, setExchangeRateCryptoLastUpdated] =
+    useState<Date | null>(null);
+  const [
+    exchangeRateCryptoTimeSinceLastUpdate,
+    setExchangeRateCryptoTimeSinceLastUpdate,
+  ] = useState<string>("");
+  const [exchangeRateCryptoAvg, setExchangeRateCryptoAvg] = useState<
+    number | null
+  >(null);
+  const [exchangeRateCryptoBuy, setExchangeRateCryptoBuy] = useState<
+    number | null
+  >(null);
+  const [exchangeRateCryptoSell, setExchangeRateCryptoSell] = useState<
+    number | null
+  >(null);
+
   useEffect(() => {
-    const fetchValueAvg = async () => {
+    const fetchBlueValue = async () => {
       try {
         console.log("Fetching latest data from API.");
         const response = await axios.get(
-          "https://api.bluelytics.com.ar/v2/latest"
+          "https://dolarapi.com/v1/dolares/blue"
         );
-        setExchangeRateLastUpdated(new Date(response.data.last_update));
-        setExchangeRateBlueAvg(response.data.blue.value_avg);
-        setExchangeRateBlueBuy(response.data.blue.value_buy);
-        setExchangeRateBlueSell(response.data.blue.value_sell);
+        const response_data = response.data;
+        // console.log("response: ", response_data);
+        setExchangeRateBlueLastUpdated(
+          new Date(response_data["fechaActualizacion"])
+        );
+        setExchangeRateBlueBuy(response_data["compra"]);
+        setExchangeRateBlueSell(response_data["venta"]);
+        const avg = (response_data["compra"] + response_data["venta"]) / 2;
+        setExchangeRateBlueAvg(avg);
       } catch (error) {
         console.error("Error fetching exchange rates:", error);
       }
     };
 
-    fetchValueAvg();
+    const fetchCryptoValue = async () => {
+      try {
+        console.log("Fetching latest data from API.");
+        const response = await axios.get(
+          "https://dolarapi.com/v1/dolares/cripto"
+        );
+        const response_data = response.data;
+        // console.log(response_data);
+        setExchangeRateCryptoLastUpdated(
+          new Date(response_data["fechaActualizacion"])
+        );
+        setExchangeRateCryptoBuy(response_data["compra"]);
+        setExchangeRateCryptoSell(response_data["venta"]);
+        const avg = (response_data["compra"] + response_data["venta"]) / 2;
+        setExchangeRateCryptoAvg(avg);
+      } catch (error) {
+        console.error("Error fetching exchange rates:", error);
+      }
+    };
+
+    fetchBlueValue();
+    fetchCryptoValue();
   }, []);
 
   useEffect(() => {
-    if (exchangeRateLastUpdated) {
+    if (exchangeRateBlueLastUpdated) {
       const now = new Date();
-      const diffMs = now.getTime() - exchangeRateLastUpdated.getTime();
+      const diffMs = now.getTime() - exchangeRateBlueLastUpdated.getTime();
       const diffMins = Math.floor(diffMs / (1000 * 60));
       const diffHours = Math.floor(diffMins / 60);
       const diffDays = Math.floor(diffHours / 24);
 
       if (diffDays > 0) {
-        setExchangeRateTimeSinceLastUpdate(`${diffDays} days ago`);
+        setExchangeRateBlueTimeSinceLastUpdate(`${diffDays} days ago`);
       } else if (diffHours > 0) {
-        setExchangeRateTimeSinceLastUpdate(`${diffHours} hours ago`);
+        setExchangeRateBlueTimeSinceLastUpdate(`${diffHours} hours ago`);
       } else if (diffMins > 0) {
-        setExchangeRateTimeSinceLastUpdate(`${diffMins} minutes ago`);
+        setExchangeRateBlueTimeSinceLastUpdate(`${diffMins} minutes ago`);
       } else {
-        setExchangeRateTimeSinceLastUpdate("just now");
+        setExchangeRateBlueTimeSinceLastUpdate("just now");
       }
     }
-  }, [exchangeRateLastUpdated]);
+  }, [exchangeRateBlueLastUpdated]);
+
+  useEffect(() => {
+    if (exchangeRateCryptoLastUpdated) {
+      const now = new Date();
+      const diffMs = now.getTime() - exchangeRateCryptoLastUpdated.getTime();
+      const diffMins = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+
+      if (diffDays > 0) {
+        setExchangeRateCryptoTimeSinceLastUpdate(`${diffDays} days ago`);
+      } else if (diffHours > 0) {
+        setExchangeRateCryptoTimeSinceLastUpdate(`${diffHours} hours ago`);
+      } else if (diffMins > 0) {
+        setExchangeRateCryptoTimeSinceLastUpdate(`${diffMins} minutes ago`);
+      } else {
+        setExchangeRateCryptoTimeSinceLastUpdate("just now");
+      }
+    }
+  }, [exchangeRateCryptoLastUpdated]);
 
   return (
     <ExchangeRateContext.Provider
@@ -82,8 +151,15 @@ export const ExchangeRateProvider: React.FC<ExchangeRateProviderProps> = ({
         exchangeRateBlueAvg,
         exchangeRateBlueBuy,
         exchangeRateBlueSell,
-        exchangeRateLastUpdated,
-        exchangeRateTimeSinceLastUpdate,
+        exchangeRateBlueLastUpdated: exchangeRateBlueLastUpdated,
+        exchangeRateBlueTimeSinceLastUpdate:
+          exchangeRateBlueTimeSinceLastUpdate,
+        exchangeRateCryptoAvg,
+        exchangeRateCryptoBuy,
+        exchangeRateCryptoSell,
+        exchangeRateCryptoLastUpdated: exchangeRateCryptoLastUpdated,
+        exchangeRateCryptoTimeSinceLastUpdate:
+          exchangeRateCryptoTimeSinceLastUpdate,
       }}
     >
       {children}

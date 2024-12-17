@@ -5,7 +5,7 @@ import { formatCurrencyARS } from "../utils/format_currency";
 import { formatDate } from "@/utils/format_date";
 import { ExchangeRateContext } from "@/contexts/ExchangeRateContext";
 
-const LatestRateDisplay: React.FC = () => {
+const LatestRateDisplayCrypto: React.FC = () => {
   const context = useContext(ExchangeRateContext);
 
   if (!context) {
@@ -13,11 +13,11 @@ const LatestRateDisplay: React.FC = () => {
   }
 
   const {
-    exchangeRateBlueAvg,
-    exchangeRateBlueBuy,
-    exchangeRateBlueSell,
-    exchangeRateLastUpdated,
-    exchangeRateTimeSinceLastUpdate,
+    exchangeRateCryptoAvg,
+    exchangeRateCryptoBuy,
+    exchangeRateCryptoSell,
+    exchangeRateCryptoLastUpdated,
+    exchangeRateCryptoTimeSinceLastUpdate,
   } = context;
 
   return (
@@ -25,7 +25,7 @@ const LatestRateDisplay: React.FC = () => {
       <div className="col">
         <div className="row">
           <div className="col">
-            <h2 className="pt-2">Latest ARS to USD Exchange Rate</h2>
+            <h2 className="pt-2">Latest ARS to USD Crypto Rate</h2>
           </div>
         </div>
         <div className="row">
@@ -47,13 +47,13 @@ const LatestRateDisplay: React.FC = () => {
               <tbody>
                 <tr>
                   <td className="border py-2">
-                    {formatCurrencyARS(exchangeRateBlueAvg!, true)}
+                    {formatCurrencyARS(exchangeRateCryptoAvg!, true)}
                   </td>
                   <td className="border py-2">
-                    {formatCurrencyARS(exchangeRateBlueSell!, true)}
+                    {formatCurrencyARS(exchangeRateCryptoSell!, true)}
                   </td>
                   <td className="border py-2">
-                    {formatCurrencyARS(exchangeRateBlueBuy!, true)}
+                    {formatCurrencyARS(exchangeRateCryptoBuy!, true)}
                   </td>
                 </tr>
               </tbody>
@@ -63,11 +63,11 @@ const LatestRateDisplay: React.FC = () => {
         <div className="row">
           <div className="col">
             <p className="mb-0">
-              Last updated: {exchangeRateTimeSinceLastUpdate}
+              Last updated: {exchangeRateCryptoTimeSinceLastUpdate}
             </p>
             <p className="mb-1">
-              {exchangeRateLastUpdated !== null
-                ? formatDate(exchangeRateLastUpdated)
+              {exchangeRateCryptoLastUpdated !== null
+                ? formatDate(exchangeRateCryptoLastUpdated)
                 : ""}
             </p>
           </div>
@@ -77,4 +77,4 @@ const LatestRateDisplay: React.FC = () => {
   );
 };
 
-export default LatestRateDisplay;
+export default LatestRateDisplayCrypto;
