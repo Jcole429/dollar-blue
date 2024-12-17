@@ -17,6 +17,7 @@ const PaymentSplitter: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Inputs
+  const [rateOverrideInput, setRateOverrideInput] = useState<string>("");
   const [totalPaymentARSInput, setTotalPaymentARSInput] = useState<
     number | string
   >("");
@@ -24,21 +25,23 @@ const PaymentSplitter: React.FC = () => {
     number | string
   >("");
   const [usdLimitInput, setUsdLimitInput] = useState<number | string>("");
+  const [usdLimitValue, setUsdLimitValue] = useState<Currency | null>(null);
 
   // Variables
-  const [totalPayment, setTotalPayment] = useState<Currency | null>(null);
-  const [firstPayment, setFirstPayment] = useState<Currency | null>(null);
-  const [firstPaymentExists, setFirstPaymentExists] = useState<Boolean>(false);
-  const [remainingAfterFirstPayment, setRemainingAfterFirstPayment] =
+  const [activeExchangeRateValue, setActiveExchangeRateValue] =
+    useState<number>(0);
+  const [totalPaymentValue, setTotalPaymentValue] = useState<Currency | null>(
+    null
+  );
+  const [prePaymentValue, setPrePaymentValue] = useState<Currency | null>(null);
+  const [prePaymentExists, setPrePaymentExists] = useState<Boolean>(false);
+
+  const [remainingAfterPrePayment, setRemainingAfterPrePayment] =
     useState<Currency | null>(null);
-  const [usdLimit, setUsdLimit] = useState<Currency | null>(null);
+
   const [usdPayment, setUsdPayment] = useState<Currency | null>(null);
-  const [remainingArsPayment, setRemainingArsPayment] =
+  const [remainingAfterUsdPayment, setRemainingAfterUsdPayment] =
     useState<Currency | null>(null);
-
-  const [rateOverrideInput, setRateOverrideInput] = useState<string>("");
-
-  const [activeExchangeRate, setActiveExchangeRate] = useState<number>(0);
 
   // Labels
   const [payment1ArsLabel, setPayment1ArsLabel] = useState<string>("");
@@ -59,11 +62,11 @@ const PaymentSplitter: React.FC = () => {
     const inputValue = event.target.value;
     setTotalPaymentARSInput(inputValue);
 
-    if (activeExchangeRate !== null) {
+    if (activeExchangeRateValue !== null) {
       const totalPaymentARSInputParsed = parseFloat(inputValue);
 
-      setTotalPayment(
-        new Currency(activeExchangeRate, {
+      setTotalPaymentValue(
+        new Currency(activeExchangeRateValue, {
           ars: totalPaymentARSInputParsed,
         })
       );
@@ -76,7 +79,10 @@ const PaymentSplitter: React.FC = () => {
     const inputValue = event.target.value;
     const maxFirstPaymentARSInputParsed = parseFloat(inputValue);
 
-    if (totalPayment && maxFirstPaymentARSInputParsed > totalPayment.valueARS) {
+    if (
+      totalPaymentValue &&
+      maxFirstPaymentARSInputParsed > totalPaymentValue.valueARS
+    ) {
       setErrorMessage("First payment cannot be greater than total payment.");
       setMaxFirstPaymentARSInput(inputValue);
       return;
@@ -85,9 +91,9 @@ const PaymentSplitter: React.FC = () => {
     setErrorMessage(null);
     setMaxFirstPaymentARSInput(inputValue);
 
-    if (activeExchangeRate !== null) {
-      setFirstPayment(
-        new Currency(activeExchangeRate, {
+    if (activeExchangeRateValue !== null) {
+      setPrePaymentValue(
+        new Currency(activeExchangeRateValue, {
           ars: maxFirstPaymentARSInputParsed,
         })
       );
@@ -101,13 +107,13 @@ const PaymentSplitter: React.FC = () => {
     setUsdLimitInput(inputValue);
 
     if (inputValue === "") {
-      setUsdLimit(null);
+      setUsdLimitValue(null);
       return;
     }
 
-    if (activeExchangeRate !== null) {
-      setUsdLimit(
-        new Currency(activeExchangeRate, {
+    if (activeExchangeRateValue !== null) {
+      setUsdLimitValue(
+        new Currency(activeExchangeRateValue, {
           usd: inputValueParsed,
         })
       );
@@ -127,63 +133,63 @@ const PaymentSplitter: React.FC = () => {
       maxFirstPaymentARSInput !== 0 &&
       maxFirstPaymentARSInput !== ""
     ) {
-      setFirstPaymentExists(true);
+      setPrePaymentExists(true);
     } else {
-      setFirstPaymentExists(false);
+      setPrePaymentExists(false);
     }
   }, [maxFirstPaymentARSInput]);
 
   useEffect(() => {
-    if (totalPayment !== null && activeExchangeRate !== null) {
+    if (totalPaymentValue !== null && activeExchangeRateValue !== null) {
       let remaining: number;
-      if (firstPaymentExists) {
-        remaining = totalPayment.valueARS - firstPayment!.valueARS;
+      if (prePaymentExists) {
+        remaining = totalPaymentValue.valueARS - prePaymentValue!.valueARS;
       } else {
-        remaining = totalPayment.valueARS;
+        remaining = totalPaymentValue.valueARS;
       }
 
-      setRemainingAfterFirstPayment(
-        new Currency(activeExchangeRate, {
+      setRemainingAfterPrePayment(
+        new Currency(activeExchangeRateValue, {
           ars: remaining,
         })
       );
     }
   }, [
-    firstPaymentExists,
-    firstPayment,
-    totalPayment,
-    activeExchangeRate,
-    usdLimit,
+    prePaymentExists,
+    prePaymentValue,
+    totalPaymentValue,
+    activeExchangeRateValue,
+    usdLimitValue,
   ]);
 
   useEffect(() => {
-    if (remainingAfterFirstPayment !== null && activeExchangeRate !== null) {
+    if (remainingAfterPrePayment !== null && activeExchangeRateValue !== null) {
       let usdPayment = 0;
       let maxUsdPossible =
-        Math.floor(remainingAfterFirstPayment.valueUSD / 100) * 100;
+        Math.floor(remainingAfterPrePayment.valueUSD / 100) * 100;
 
-      if (usdLimit && maxUsdPossible > usdLimit.valueUSD) {
-        usdPayment = Math.floor(usdLimit.valueUSD / 100) * 100;
+      if (usdLimitValue && maxUsdPossible > usdLimitValue.valueUSD) {
+        usdPayment = Math.floor(usdLimitValue.valueUSD / 100) * 100;
       } else {
         usdPayment = maxUsdPossible;
       }
       setUsdPayment(
-        new Currency(activeExchangeRate, {
+        new Currency(activeExchangeRateValue, {
           usd: usdPayment,
         })
       );
     }
-  }, [remainingAfterFirstPayment]);
+  }, [remainingAfterPrePayment]);
 
   useEffect(() => {
     if (
       usdPayment !== null &&
-      remainingAfterFirstPayment !== null &&
-      activeExchangeRate !== null
+      remainingAfterPrePayment !== null &&
+      activeExchangeRateValue !== null
     ) {
-      setRemainingArsPayment(
-        new Currency(activeExchangeRate, {
-          ars: remainingAfterFirstPayment.valueARS - usdPayment.valueARS,
+      setRemainingAfterUsdPayment(
+        new Currency(activeExchangeRateValue, {
+          ars: remainingAfterPrePayment.valueARS - usdPayment.valueARS,
         })
       );
     }
@@ -191,10 +197,10 @@ const PaymentSplitter: React.FC = () => {
 
   useEffect(() => {
     if (exchangeRateBlueAvg !== null) {
-      setActiveExchangeRate(exchangeRateBlueAvg);
+      setActiveExchangeRateValue(exchangeRateBlueAvg);
       if (totalPaymentARSInput !== null) {
-        setTotalPayment(
-          new Currency(activeExchangeRate, {
+        setTotalPaymentValue(
+          new Currency(activeExchangeRateValue, {
             ars: parseFloat(totalPaymentARSInput.toString()),
           })
         );
@@ -204,18 +210,18 @@ const PaymentSplitter: React.FC = () => {
 
   useEffect(() => {
     if (rateOverrideInput !== "" && rateOverrideInput !== null) {
-      setActiveExchangeRate(parseFloat(rateOverrideInput));
+      setActiveExchangeRateValue(parseFloat(rateOverrideInput));
       if (totalPaymentARSInput !== null) {
-        setTotalPayment(
+        setTotalPaymentValue(
           new Currency(parseFloat(rateOverrideInput), {
             ars: parseFloat(totalPaymentARSInput.toString()),
           })
         );
       }
     } else if (exchangeRateBlueAvg !== null) {
-      setActiveExchangeRate(exchangeRateBlueAvg);
+      setActiveExchangeRateValue(exchangeRateBlueAvg);
       if (totalPaymentARSInput !== null) {
-        setTotalPayment(
+        setTotalPaymentValue(
           new Currency(exchangeRateBlueAvg, {
             ars: parseFloat(totalPaymentARSInput.toString()),
           })
@@ -226,17 +232,17 @@ const PaymentSplitter: React.FC = () => {
 
   useEffect(() => {
     if (
-      firstPayment &&
-      !Number.isNaN(firstPayment.valueARS) &&
-      !Number.isNaN(firstPayment.valueUSD)
+      prePaymentValue &&
+      !Number.isNaN(prePaymentValue.valueARS) &&
+      !Number.isNaN(prePaymentValue.valueUSD)
     ) {
-      setPayment1ArsLabel(formatCurrencyARS(firstPayment.valueARS));
-      setPayment1UsdLabel(formatCurrencyUSD(firstPayment.valueUSD));
+      setPayment1ArsLabel(formatCurrencyARS(prePaymentValue.valueARS));
+      setPayment1UsdLabel(formatCurrencyUSD(prePaymentValue.valueUSD));
     } else {
       setPayment1ArsLabel("");
       setPayment1UsdLabel("");
     }
-  }, [firstPayment]);
+  }, [prePaymentValue]);
 
   useEffect(() => {
     if (
@@ -254,31 +260,31 @@ const PaymentSplitter: React.FC = () => {
 
   useEffect(() => {
     if (
-      remainingArsPayment &&
-      !Number.isNaN(remainingArsPayment.valueARS) &&
-      !Number.isNaN(remainingArsPayment.valueUSD)
+      remainingAfterUsdPayment &&
+      !Number.isNaN(remainingAfterUsdPayment.valueARS) &&
+      !Number.isNaN(remainingAfterUsdPayment.valueUSD)
     ) {
-      setPayment3ArsLabel(formatCurrencyARS(remainingArsPayment.valueARS));
-      setPayment3UsdLabel(formatCurrencyUSD(remainingArsPayment.valueUSD));
+      setPayment3ArsLabel(formatCurrencyARS(remainingAfterUsdPayment.valueARS));
+      setPayment3UsdLabel(formatCurrencyUSD(remainingAfterUsdPayment.valueUSD));
     } else {
       setPayment3ArsLabel("");
       setPayment3UsdLabel("");
     }
-  }, [remainingArsPayment]);
+  }, [remainingAfterUsdPayment]);
 
   useEffect(() => {
     if (
-      totalPayment &&
-      !Number.isNaN(totalPayment.valueARS) &&
-      !Number.isNaN(totalPayment.valueUSD)
+      totalPaymentValue &&
+      !Number.isNaN(totalPaymentValue.valueARS) &&
+      !Number.isNaN(totalPaymentValue.valueUSD)
     ) {
-      setPaymentTotalArsLabel(formatCurrencyARS(totalPayment.valueARS));
-      setPaymentTotalUsdLabel(formatCurrencyUSD(totalPayment.valueUSD));
+      setPaymentTotalArsLabel(formatCurrencyARS(totalPaymentValue.valueARS));
+      setPaymentTotalUsdLabel(formatCurrencyUSD(totalPaymentValue.valueUSD));
     } else {
       setPaymentTotalArsLabel("");
       setPaymentTotalUsdLabel("");
     }
-  }, [totalPayment]);
+  }, [totalPaymentValue]);
 
   return (
     <div className="section row border pb-2 mx-0">
@@ -411,7 +417,7 @@ const PaymentSplitter: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {firstPaymentExists && (
+                {prePaymentExists && (
                   <tr>
                     <td className="">1</td>
                     <td className="table-active">{payment1ArsLabel}</td>
@@ -420,16 +426,16 @@ const PaymentSplitter: React.FC = () => {
                 )}
                 <tr>
                   <td className="">
-                    {firstPaymentExists && 2}
-                    {!firstPaymentExists && 1}
+                    {prePaymentExists && 2}
+                    {!prePaymentExists && 1}
                   </td>
                   <td className="">{payment2ArsLabel}</td>
                   <td className="table-active">{payment2UsdLabel}</td>
                 </tr>
                 <tr>
                   <td className="">
-                    {firstPaymentExists && 3}
-                    {!firstPaymentExists && 2}
+                    {prePaymentExists && 3}
+                    {!prePaymentExists && 2}
                   </td>
                   <td className="table-active">{payment3ArsLabel}</td>
                   <td className="">{payment3UsdLabel}</td>
