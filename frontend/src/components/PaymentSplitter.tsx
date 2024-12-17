@@ -43,6 +43,8 @@ const PaymentSplitter: React.FC = () => {
   const [remainingAfterUsdPayment, setRemainingAfterUsdPayment] =
     useState<Currency | null>(null);
 
+  const [displayUsdPayment, setDisplayUsdPayment] = useState<boolean>(false);
+
   // Labels
   const [payment1ArsLabel, setPayment1ArsLabel] = useState<string>("");
   const [payment1UsdLabel, setPayment1UsdLabel] = useState<string>("");
@@ -192,6 +194,11 @@ const PaymentSplitter: React.FC = () => {
           ars: remainingAfterPrePayment.valueARS - usdPayment.valueARS,
         })
       );
+      if (usdPayment.valueUSD > 0) {
+        setDisplayUsdPayment(true);
+      } else {
+        setDisplayUsdPayment(false);
+      }
     }
   }, [usdPayment]);
 
@@ -424,18 +431,22 @@ const PaymentSplitter: React.FC = () => {
                     <td className="">{payment1UsdLabel}</td>
                   </tr>
                 )}
+                {displayUsdPayment && (
+                  <tr>
+                    <td className="">
+                      {prePaymentExists && 2}
+                      {!prePaymentExists && 1}
+                    </td>
+                    <td className="">{payment2ArsLabel}</td>
+                    <td className="table-active">{payment2UsdLabel}</td>
+                  </tr>
+                )}
                 <tr>
                   <td className="">
-                    {prePaymentExists && 2}
-                    {!prePaymentExists && 1}
-                  </td>
-                  <td className="">{payment2ArsLabel}</td>
-                  <td className="table-active">{payment2UsdLabel}</td>
-                </tr>
-                <tr>
-                  <td className="">
-                    {prePaymentExists && 3}
-                    {!prePaymentExists && 2}
+                    {prePaymentExists && displayUsdPayment && 3}
+                    {prePaymentExists && !displayUsdPayment && 2}
+                    {!prePaymentExists && displayUsdPayment && 2}
+                    {!prePaymentExists && !displayUsdPayment && 1}
                   </td>
                   <td className="table-active">{payment3ArsLabel}</td>
                   <td className="">{payment3UsdLabel}</td>
