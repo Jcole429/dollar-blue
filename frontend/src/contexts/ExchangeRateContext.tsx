@@ -60,6 +60,20 @@ export const ExchangeRateProvider: React.FC<ExchangeRateProviderProps> = ({
     number | null
   >(null);
 
+  const calculateTimeSinceUpdate = (lastUpdated: Date | null): string => {
+    if (!lastUpdated) return "Never updated";
+    const now = new Date();
+    const diffMs = now.getTime() - lastUpdated.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffDays > 0) return `${diffDays} days ago`;
+    if (diffHours > 0) return `${diffHours} hours ago`;
+    if (diffMins > 0) return `${diffMins} minutes ago`;
+    return "just now";
+  };
+
   useEffect(() => {
     const fetchBlueValue = async () => {
       try {
@@ -106,45 +120,16 @@ export const ExchangeRateProvider: React.FC<ExchangeRateProviderProps> = ({
   }, []);
 
   useEffect(() => {
-    if (exchangeRateBlueLastUpdated) {
-      const now = new Date();
-      const diffMs = now.getTime() - exchangeRateBlueLastUpdated.getTime();
-      const diffMins = Math.floor(diffMs / (1000 * 60));
-      const diffHours = Math.floor(diffMins / 60);
-      const diffDays = Math.floor(diffHours / 24);
-
-      if (diffDays > 0) {
-        setExchangeRateBlueTimeSinceLastUpdate(`${diffDays} days ago`);
-      } else if (diffHours > 0) {
-        setExchangeRateBlueTimeSinceLastUpdate(`${diffHours} hours ago`);
-      } else if (diffMins > 0) {
-        setExchangeRateBlueTimeSinceLastUpdate(`${diffMins} minutes ago`);
-      } else {
-        setExchangeRateBlueTimeSinceLastUpdate("just now");
-      }
-    }
+    setExchangeRateBlueTimeSinceLastUpdate(
+      calculateTimeSinceUpdate(exchangeRateBlueLastUpdated)
+    );
   }, [exchangeRateBlueLastUpdated]);
 
   useEffect(() => {
-    if (exchangeRateCryptoLastUpdated) {
-      const now = new Date();
-      const diffMs = now.getTime() - exchangeRateCryptoLastUpdated.getTime();
-      const diffMins = Math.floor(diffMs / (1000 * 60));
-      const diffHours = Math.floor(diffMins / 60);
-      const diffDays = Math.floor(diffHours / 24);
-
-      if (diffDays > 0) {
-        setExchangeRateCryptoTimeSinceLastUpdate(`${diffDays} days ago`);
-      } else if (diffHours > 0) {
-        setExchangeRateCryptoTimeSinceLastUpdate(`${diffHours} hours ago`);
-      } else if (diffMins > 0) {
-        setExchangeRateCryptoTimeSinceLastUpdate(`${diffMins} minutes ago`);
-      } else {
-        setExchangeRateCryptoTimeSinceLastUpdate("just now");
-      }
-    }
+    setExchangeRateCryptoTimeSinceLastUpdate(
+      calculateTimeSinceUpdate(exchangeRateCryptoLastUpdated)
+    );
   }, [exchangeRateCryptoLastUpdated]);
-
   return (
     <ExchangeRateContext.Provider
       value={{
