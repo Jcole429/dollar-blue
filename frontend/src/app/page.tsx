@@ -8,23 +8,32 @@ import RateSelector from "@/components/RateSelector";
 
 export default function Home() {
   return (
-    <div className="container mx-auto" style={{ maxWidth: "800px" }}>
-      <div className="row">
-        <div className="col border m-2 p-2">
-          <h1 className="p-2 mb-2">Dollar Blue</h1>
-          <CurrentExchangeRateProvider>
-            <ExchangeRateToUseProvider>
+    <CurrentExchangeRateProvider>
+      <ExchangeRateToUseProvider>
+        <div
+          className="container mx-auto border m-2 p-2"
+          // style={{ maxWidth: "800px" }}
+        >
+          <div className="row">
+            <div className="col">
+              <h1 className="p-2 mb-2">Dollar Blue</h1>
+            </div>
+          </div>
+          <div className="row">
+            <div className="col-lg-4">
               <LatestRateDisplayBlue />
               <LatestRateDisplayCrypto />
+            </div>
+            <div className="col">
               <RateSelector />
               <Converter />
               <PaymentSplitter />
               {/* <ExchangeRatesTable /> */}
               {/* <Graph /> */}
-            </ExchangeRateToUseProvider>
-          </CurrentExchangeRateProvider>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </ExchangeRateToUseProvider>
+    </CurrentExchangeRateProvider>
   );
 }
