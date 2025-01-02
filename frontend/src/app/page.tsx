@@ -3,6 +3,8 @@ import LatestRateDisplayCrypto from "@/components/LatestRateDisplayCrypto";
 import Converter from "@/components/Converter";
 import PaymentSplitter from "@/components/PaymentSplitter";
 import { CurrentExchangeRateProvider } from "@/contexts/CurrentExchangeRateContext";
+import { ExchangeRateToUseProvider } from "@/contexts/ExchangeRateToUseContext";
+import RateSelector from "@/components/RateSelector";
 
 export default function Home() {
   return (
@@ -12,12 +14,13 @@ export default function Home() {
           <h1 className="p-2 mb-2">Dollar Blue</h1>
           <CurrentExchangeRateProvider>
             <ExchangeRateToUseProvider>
-            <LatestRateDisplayBlue />
-            <LatestRateDisplayCrypto />
-            <Converter />
-            <PaymentSplitter />
-            {/* <ExchangeRatesTable /> */}
-            {/* <Graph /> */}
+              <LatestRateDisplayBlue />
+              <LatestRateDisplayCrypto />
+              <RateSelector />
+              <Converter />
+              <PaymentSplitter />
+              {/* <ExchangeRatesTable /> */}
+              {/* <Graph /> */}
             </ExchangeRateToUseProvider>
           </CurrentExchangeRateProvider>
         </div>
