@@ -92,9 +92,14 @@ export const CurrentExchangeRateProvider: React.FC<
         setExchangeRateBlueLastUpdated(
           new Date(response_data["fechaActualizacion"])
         );
-        setExchangeRateBlueBuy(response_data["compra"]);
-        setExchangeRateBlueSell(response_data["venta"]);
-        const avg = (response_data["compra"] + response_data["venta"]) / 2;
+
+        // Round buy and sell values to 2 decimal places
+        const buy = Math.round(response_data["compra"] * 100) / 100;
+        const sell = Math.round(response_data["venta"] * 100) / 100;
+        const avg = Math.round(((buy + sell) / 2) * 100) / 100;
+
+        setExchangeRateBlueBuy(buy);
+        setExchangeRateBlueSell(sell);
         setExchangeRateBlueAvg(avg);
       } catch (error) {
         console.error("Error fetching exchange rates:", error);
@@ -112,9 +117,14 @@ export const CurrentExchangeRateProvider: React.FC<
         setExchangeRateCryptoLastUpdated(
           new Date(response_data["fechaActualizacion"])
         );
-        setExchangeRateCryptoBuy(response_data["compra"]);
-        setExchangeRateCryptoSell(response_data["venta"]);
-        const avg = (response_data["compra"] + response_data["venta"]) / 2;
+
+        // Round buy and sell values to 2 decimal places
+        const buy = Math.round(response_data["compra"] * 100) / 100;
+        const sell = Math.round(response_data["venta"] * 100) / 100;
+        const avg = Math.round(((buy + sell) / 2) * 100) / 100;
+
+        setExchangeRateCryptoBuy(buy);
+        setExchangeRateCryptoSell(sell);
         setExchangeRateCryptoAvg(avg);
       } catch (error) {
         console.error("Error fetching exchange rates:", error);
