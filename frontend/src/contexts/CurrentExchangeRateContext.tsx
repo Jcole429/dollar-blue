@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useState, useEffect, ReactNode } from "react";
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  ReactNode,
+} from "react";
 import axios from "axios";
 
 // Define the context and the provider props type
@@ -151,4 +157,15 @@ export const CurrentExchangeRateProvider: React.FC<
       {children}
     </CurrentExchangeRateContext.Provider>
   );
+};
+
+// Custom hook for convenience
+export const useCurrentExchangeRateContext = () => {
+  const context = useContext(CurrentExchangeRateContext);
+  if (!context) {
+    throw new Error(
+      "useExchangeRateToUse must be used within an ExchangeRateToUseProvider"
+    );
+  }
+  return context;
 };
