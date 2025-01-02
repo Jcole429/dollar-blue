@@ -31,11 +31,19 @@ const RateSelector: React.FC = () => {
     setError("");
 
     try {
+      const date_parts = date.split("-");
+      const year = date_parts[0];
+      const month = date_parts[1];
+      const day = date_parts[2];
       const response = await axios.get(
-        `'https://api.argentinadatos.com/v1/cotizaciones/dolares/${rateType}/${date}`
+        `https://api.argentinadatos.com/v1/cotizaciones/dolares/${rateType}/${year}/${month}/${day}`
       );
-      const rate = response.data.rate;
-      return rate;
+
+      const buy = Math.round(response.data["compra"] * 100) / 100;
+      const sell = Math.round(response.data["venta"] * 100) / 100;
+      const avg = Math.round(((buy + sell) / 2) * 100) / 100;
+
+      return avg;
     } catch (err) {
       console.error("Error fetching historical rate:", err);
       setError("Failed to fetch historical rate. Please try again.");
@@ -45,7 +53,7 @@ const RateSelector: React.FC = () => {
     }
   };
 
-  const handleRateTypeChange = (type: "blue" | "cripto" | "custom") => {
+  const handleRateTypeChange = async (type: "blue" | "cripto" | "custom") => {
     setSelectedRateType(type);
 
     if (type === "custom") {
@@ -59,13 +67,13 @@ const RateSelector: React.FC = () => {
           : null;
       setExchangeRateToUse(rate ?? null);
     } else if (rateOption === "historical") {
-      const rate =
-        type === "blue"
-          ? exchangeRateBlueAvg
-          : type === "cripto"
-          ? exchangeRateCryptoAvg
-          : null;
-      setExchangeRateToUse(rate ?? null);
+      if (selectedDate === undefined) return;
+      try {
+        const rate = await fetchHistoricalRate(selectedRateType, selectedDate);
+        setExchangeRateToUse(rate ?? null);
+      } catch (error) {
+        console.error(`Error fetching historical rate:`, error);
+      }
     }
   };
 
@@ -83,17 +91,23 @@ const RateSelector: React.FC = () => {
     }
   };
 
-  const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDateChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const date = event.target.value;
     setSelectedDate(date);
 
-    // Fetch and set the historical rate (mock implementation here)
     if (rateOption === "historical" && date) {
-      console.log(
-        `Fetching historical rate for ${selectedRateType} on ${date}`
-      );
-      // You would fetch the rate for the specific date here
-      setExchangeRateToUse(123.45); // Replace with fetched rate
+      try {
+        const historical_rate = await fetchHistoricalRate(
+          selectedRateType,
+          date
+        );
+        console.log("Received value: ", historical_rate);
+        setExchangeRateToUse(historical_rate);
+      } catch (error) {
+        console.error(`Error fetching historical rate:`, error);
+      }
     }
   };
 
