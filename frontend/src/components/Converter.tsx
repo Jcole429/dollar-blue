@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect, useContext } from "react";
 import { formatCurrencyARS, formatCurrencyUSD } from "../utils/format_currency";
-import { ExchangeRateContext } from "@/contexts/ExchangeRateContext";
+import { CurrentExchangeRateContext } from "@/contexts/CurrentExchangeRateContext";
 
 const Converter: React.FC = () => {
-  const context = useContext(ExchangeRateContext);
+  const context = useContext(CurrentExchangeRateContext);
 
   if (!context) {
     throw new Error("PaymentSplitter must be used within a ValueAvgProvider");

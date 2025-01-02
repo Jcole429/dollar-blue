@@ -4,7 +4,7 @@ import React, { createContext, useState, useEffect, ReactNode } from "react";
 import axios from "axios";
 
 // Define the context and the provider props type
-interface ExchangeRateContextProps {
+interface CurrentExchangeRateContextProps {
   exchangeRateBlueAvg: number | null;
   exchangeRateBlueBuy: number | null;
   exchangeRateBlueSell: number | null;
@@ -17,17 +17,17 @@ interface ExchangeRateContextProps {
   exchangeRateCryptoTimeSinceLastUpdate: string | null;
 }
 
-export const ExchangeRateContext = createContext<
-  ExchangeRateContextProps | undefined
+export const CurrentExchangeRateContext = createContext<
+  CurrentExchangeRateContextProps | undefined
 >(undefined);
 
-interface ExchangeRateProviderProps {
+interface CurrentExchangeRateProviderProps {
   children: ReactNode;
 }
 
-export const ExchangeRateProvider: React.FC<ExchangeRateProviderProps> = ({
-  children,
-}) => {
+export const CurrentExchangeRateProvider: React.FC<
+  CurrentExchangeRateProviderProps
+> = ({ children }) => {
   const [exchangeRateBlueLastUpdated, setExchangeRateBlueLastUpdated] =
     useState<Date | null>(null);
   const [
@@ -130,8 +130,9 @@ export const ExchangeRateProvider: React.FC<ExchangeRateProviderProps> = ({
       calculateTimeSinceUpdate(exchangeRateCryptoLastUpdated)
     );
   }, [exchangeRateCryptoLastUpdated]);
+
   return (
-    <ExchangeRateContext.Provider
+    <CurrentExchangeRateContext.Provider
       value={{
         exchangeRateBlueAvg,
         exchangeRateBlueBuy,
@@ -148,6 +149,6 @@ export const ExchangeRateProvider: React.FC<ExchangeRateProviderProps> = ({
       }}
     >
       {children}
-    </ExchangeRateContext.Provider>
+    </CurrentExchangeRateContext.Provider>
   );
 };

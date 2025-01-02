@@ -2,7 +2,7 @@ import LatestRateDisplayBlue from "@/components/LatestRateDisplayBlue";
 import LatestRateDisplayCrypto from "@/components/LatestRateDisplayCrypto";
 import Converter from "@/components/Converter";
 import PaymentSplitter from "@/components/PaymentSplitter";
-import { ExchangeRateProvider } from "@/contexts/ExchangeRateContext";
+import { CurrentExchangeRateProvider } from "@/contexts/CurrentExchangeRateContext";
 
 export default function Home() {
   return (
@@ -10,14 +10,14 @@ export default function Home() {
       <div className="row">
         <div className="col border m-2 p-2">
           <h1 className="p-2 mb-2">Dollar Blue</h1>
-          <ExchangeRateProvider>
+          <CurrentExchangeRateProvider>
             <LatestRateDisplayBlue />
             <LatestRateDisplayCrypto />
             <Converter />
             <PaymentSplitter />
             {/* <ExchangeRatesTable /> */}
             {/* <Graph /> */}
-          </ExchangeRateProvider>
+          </CurrentExchangeRateProvider>
         </div>
       </div>
     </div>
