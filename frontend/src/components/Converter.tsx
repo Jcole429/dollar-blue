@@ -2,16 +2,10 @@
 
 import React, { useState, useEffect, useContext } from "react";
 import { formatCurrencyARS, formatCurrencyUSD } from "../utils/format_currency";
-import { CurrentExchangeRateContext } from "@/contexts/CurrentExchangeRateContext";
+import { useExchangeRateToUse } from "@/contexts/ExchangeRateToUseContext";
 
 const Converter: React.FC = () => {
-  const context = useContext(CurrentExchangeRateContext);
-
-  if (!context) {
-    throw new Error("PaymentSplitter must be used within a ValueAvgProvider");
-  }
-
-  const { exchangeRateBlueAvg } = context;
+  const { exchangeRateToUse } = useExchangeRateToUse();
 
   const [usdToArsInput, setUsdToArsInput] = useState<string>("");
   const [usdToArsValue, setUsdToArsValue] = useState<number | null>(null);
@@ -28,36 +22,36 @@ const Converter: React.FC = () => {
   const [usdAmountDisplay, setUsdAmountDisplay] = useState<string>("");
 
   useEffect(() => {
-    if (exchangeRateBlueAvg !== null && usdToArsValue !== null) {
+    if (exchangeRateToUse !== null && usdToArsValue !== null) {
       if (rateOverrideValue !== null) {
         setArsAmountDisplay(
           formatCurrencyARS(usdToArsValue * rateOverrideValue)
         );
       } else {
         setArsAmountDisplay(
-          formatCurrencyARS(usdToArsValue * exchangeRateBlueAvg)
+          formatCurrencyARS(usdToArsValue * exchangeRateToUse)
         );
       }
     } else {
       setArsAmountDisplay("");
     }
-  }, [usdToArsValue, exchangeRateBlueAvg, rateOverrideValue]);
+  }, [usdToArsValue, exchangeRateToUse, rateOverrideValue]);
 
   useEffect(() => {
-    if (exchangeRateBlueAvg !== null && arsToUsdValue !== null) {
+    if (exchangeRateToUse !== null && arsToUsdValue !== null) {
       if (rateOverrideValue !== null) {
         setUsdAmountDisplay(
           formatCurrencyUSD(arsToUsdValue / rateOverrideValue)
         );
       } else {
         setUsdAmountDisplay(
-          formatCurrencyUSD(arsToUsdValue / exchangeRateBlueAvg)
+          formatCurrencyUSD(arsToUsdValue / exchangeRateToUse)
         );
       }
     } else {
       setUsdAmountDisplay("");
     }
-  }, [arsToUsdValue, exchangeRateBlueAvg, rateOverrideValue]);
+  }, [arsToUsdValue, exchangeRateToUse, rateOverrideValue]);
 
   const handleUsdToArsInputChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -75,14 +69,6 @@ const Converter: React.FC = () => {
     setArsToUsdInput(event.target.value);
   };
 
-  const handleRateOverrideChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = parseFloat(event.target.value.replace(/\D/g, "")) || null;
-    setRateOverrideValue(value);
-    setRateOverrideInput(event.target.value);
-  };
-
   return (
     <div className="section row border mb-2 mx-0">
       <div className="col">
@@ -90,20 +76,6 @@ const Converter: React.FC = () => {
           <div className="col">
             <h2 className="pt-2">Currency Converter</h2>
           </div>
-        </div>
-        <div className="row">
-          <div>Rate override</div>
-          <div className="col input-group">
-            <span className="input-group-text">ARS</span>
-            <input
-              type="text"
-              value={rateOverrideInput}
-              onChange={handleRateOverrideChange}
-              placeholder=""
-              className="form-control border"
-            />
-          </div>
-          <div className="col"></div>
         </div>
         <div className="row grid gap-2 p-2">
           <div className="col-md border py-2">
