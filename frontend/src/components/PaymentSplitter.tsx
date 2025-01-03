@@ -3,21 +3,14 @@
 import React, { useState, useEffect, useContext } from "react";
 import { formatCurrencyARS, formatCurrencyUSD } from "../utils/format_currency";
 import { Currency } from "../models/Currency"; // Adjust the import path as needed
-import { CurrentExchangeRateContext } from "@/contexts/CurrentExchangeRateContext";
+import { useExchangeRateToUse } from "@/contexts/ExchangeRateToUseContext";
 
 const PaymentSplitter: React.FC = () => {
-  const context = useContext(CurrentExchangeRateContext);
-
-  if (!context) {
-    throw new Error("PaymentSplitter must be used within a ValueAvgProvider");
-  }
-
-  const { exchangeRateBlueAvg } = context;
+  const { exchangeRateToUse } = useExchangeRateToUse();
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Inputs
-  const [rateOverrideInput, setRateOverrideInput] = useState<string>("");
   const [totalPaymentARSInput, setTotalPaymentARSInput] = useState<
     number | string
   >("");
@@ -28,8 +21,6 @@ const PaymentSplitter: React.FC = () => {
   const [usdLimitValue, setUsdLimitValue] = useState<Currency | null>(null);
 
   // Variables
-  const [activeExchangeRateValue, setActiveExchangeRateValue] =
-    useState<number>(0);
   const [totalPaymentValue, setTotalPaymentValue] = useState<Currency | null>(
     null
   );
@@ -64,11 +55,11 @@ const PaymentSplitter: React.FC = () => {
     const inputValue = event.target.value;
     setTotalPaymentARSInput(inputValue);
 
-    if (activeExchangeRateValue !== null) {
+    if (exchangeRateToUse !== null) {
       const totalPaymentARSInputParsed = parseFloat(inputValue);
 
       setTotalPaymentValue(
-        new Currency(activeExchangeRateValue, {
+        new Currency(exchangeRateToUse, {
           ars: totalPaymentARSInputParsed,
         })
       );
@@ -93,9 +84,9 @@ const PaymentSplitter: React.FC = () => {
     setErrorMessage(null);
     setMaxFirstPaymentARSInput(inputValue);
 
-    if (activeExchangeRateValue !== null) {
+    if (exchangeRateToUse !== null) {
       setPrePaymentValue(
-        new Currency(activeExchangeRateValue, {
+        new Currency(exchangeRateToUse, {
           ars: maxFirstPaymentARSInputParsed,
         })
       );
@@ -113,20 +104,13 @@ const PaymentSplitter: React.FC = () => {
       return;
     }
 
-    if (activeExchangeRateValue !== null) {
+    if (exchangeRateToUse !== null) {
       setUsdLimitValue(
-        new Currency(activeExchangeRateValue, {
+        new Currency(exchangeRateToUse, {
           usd: inputValueParsed,
         })
       );
     }
-  };
-
-  const handleRateOverrideChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = parseFloat(event.target.value);
-    setRateOverrideInput(event.target.value);
   };
 
   useEffect(() => {
@@ -142,7 +126,7 @@ const PaymentSplitter: React.FC = () => {
   }, [maxFirstPaymentARSInput]);
 
   useEffect(() => {
-    if (totalPaymentValue !== null && activeExchangeRateValue !== null) {
+    if (totalPaymentValue !== null && exchangeRateToUse !== null) {
       let remaining: number;
       if (prePaymentExists) {
         remaining = totalPaymentValue.valueARS - prePaymentValue!.valueARS;
@@ -151,7 +135,7 @@ const PaymentSplitter: React.FC = () => {
       }
 
       setRemainingAfterPrePayment(
-        new Currency(activeExchangeRateValue, {
+        new Currency(exchangeRateToUse, {
           ars: remaining,
         })
       );
@@ -160,12 +144,12 @@ const PaymentSplitter: React.FC = () => {
     prePaymentExists,
     prePaymentValue,
     totalPaymentValue,
-    activeExchangeRateValue,
+    exchangeRateToUse,
     usdLimitValue,
   ]);
 
   useEffect(() => {
-    if (remainingAfterPrePayment !== null && activeExchangeRateValue !== null) {
+    if (remainingAfterPrePayment !== null && exchangeRateToUse !== null) {
       let usdPayment = 0;
       let maxUsdPossible =
         Math.floor(remainingAfterPrePayment.valueUSD / 100) * 100;
@@ -176,7 +160,7 @@ const PaymentSplitter: React.FC = () => {
         usdPayment = maxUsdPossible;
       }
       setUsdPayment(
-        new Currency(activeExchangeRateValue, {
+        new Currency(exchangeRateToUse, {
           usd: usdPayment,
         })
       );
@@ -187,10 +171,10 @@ const PaymentSplitter: React.FC = () => {
     if (
       usdPayment !== null &&
       remainingAfterPrePayment !== null &&
-      activeExchangeRateValue !== null
+      exchangeRateToUse !== null
     ) {
       setRemainingAfterUsdPayment(
-        new Currency(activeExchangeRateValue, {
+        new Currency(exchangeRateToUse, {
           ars: remainingAfterPrePayment.valueARS - usdPayment.valueARS,
         })
       );
@@ -203,39 +187,19 @@ const PaymentSplitter: React.FC = () => {
   }, [usdPayment]);
 
   useEffect(() => {
-    if (exchangeRateBlueAvg !== null) {
-      setActiveExchangeRateValue(exchangeRateBlueAvg);
+    if (exchangeRateToUse !== null) {
       if (totalPaymentARSInput !== null) {
+        const new_total_payment_value = parseFloat(
+          totalPaymentARSInput.toString()
+        );
         setTotalPaymentValue(
-          new Currency(activeExchangeRateValue, {
-            ars: parseFloat(totalPaymentARSInput.toString()),
+          new Currency(exchangeRateToUse, {
+            ars: new_total_payment_value,
           })
         );
       }
     }
-  }, [exchangeRateBlueAvg]);
-
-  useEffect(() => {
-    if (rateOverrideInput !== "" && rateOverrideInput !== null) {
-      setActiveExchangeRateValue(parseFloat(rateOverrideInput));
-      if (totalPaymentARSInput !== null) {
-        setTotalPaymentValue(
-          new Currency(parseFloat(rateOverrideInput), {
-            ars: parseFloat(totalPaymentARSInput.toString()),
-          })
-        );
-      }
-    } else if (exchangeRateBlueAvg !== null) {
-      setActiveExchangeRateValue(exchangeRateBlueAvg);
-      if (totalPaymentARSInput !== null) {
-        setTotalPaymentValue(
-          new Currency(exchangeRateBlueAvg, {
-            ars: parseFloat(totalPaymentARSInput.toString()),
-          })
-        );
-      }
-    }
-  }, [rateOverrideInput]);
+  }, [exchangeRateToUse]);
 
   useEffect(() => {
     if (
@@ -325,20 +289,6 @@ const PaymentSplitter: React.FC = () => {
               <li>Optionally, enter the max amount of USD to use.</li>
             </ol>
           </div>
-        </div>
-        <div className="row pb-2">
-          <div>Rate override</div>
-          <div className="col input-group">
-            <span className="input-group-text">ARS</span>
-            <input
-              type="text"
-              value={rateOverrideInput}
-              onChange={handleRateOverrideChange}
-              placeholder=""
-              className="form-control border"
-            />
-          </div>
-          <div className="col"></div>
         </div>
         <div className="row grid gap-2 px-2">
           <div className="col-md border py-2">
