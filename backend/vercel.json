@@ -23,7 +23,7 @@
   "crons": [
     {
       "path": "/api/fetch_and_store",
-      "schedule": "0 5 * * *"
+      "schedule": "*/10 * * * *"
     }
   ]
 }
