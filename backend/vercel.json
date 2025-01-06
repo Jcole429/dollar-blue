@@ -1,0 +1,16 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "api/fetch_and_store.py",
+        "use": "@vercel/python"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/api/fetch_and_store",
+        "dest": "api/fetch_and_store.py"
+      }
+    ]
+  }
+  
