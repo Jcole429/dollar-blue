@@ -1,10 +1,9 @@
-import LatestRateDisplayBlue from "@/components/LatestRateDisplayBlue";
-import LatestRateDisplayCrypto from "@/components/LatestRateDisplayCrypto";
 import Converter from "@/components/Converter";
 import PaymentSplitter from "@/components/PaymentSplitter";
 import { CurrentExchangeRateProvider } from "@/contexts/CurrentExchangeRateContext";
 import { ExchangeRateToUseProvider } from "@/contexts/ExchangeRateToUseContext";
 import RateSelector from "@/components/RateSelector";
+import LatestRateDisplay from "@/components/LatestRateDisplay";
 
 export default function Home() {
   return (
@@ -21,8 +20,8 @@ export default function Home() {
           </div>
           <div className="row">
             <div className="col-lg-4">
-              <LatestRateDisplayBlue />
-              <LatestRateDisplayCrypto />
+              <LatestRateDisplay rateType="blue" />
+              <LatestRateDisplay rateType="crypto" />
             </div>
             <div className="col">
               <RateSelector />
