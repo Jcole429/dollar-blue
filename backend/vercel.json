@@ -10,6 +10,16 @@
       {
         "src": "/api/fetch_and_store",
         "dest": "api/fetch_and_store.py"
+    },
+    {
+      "src": "/api",
+      "dest": "api/index.py"
+    },
+    {
+      "src": "/",
+      "dest": "index.py"
+    }
+  ],
       }
     ]
   }
