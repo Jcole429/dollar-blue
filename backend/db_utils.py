@@ -25,7 +25,7 @@ class ExchangeData(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     type = Column(Text, nullable=False)
     source = Column(Text, nullable=False)
-    updated_date = Column(Date, nullable=False)
+    updated_date = Column(DateTime, nullable=False)
     buy = Column(Numeric, nullable=False)
     sell = Column(Numeric, nullable=False)
     avg = Column(Numeric, nullable=False)
