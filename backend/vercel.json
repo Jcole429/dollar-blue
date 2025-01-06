@@ -1,15 +1,15 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "api/fetch_and_store.py",
-        "use": "@vercel/python"
-      }
-    ],
-    "routes": [
-      {
-        "src": "/api/fetch_and_store",
-        "dest": "api/fetch_and_store.py"
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/fetch_and_store.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/fetch_and_store",
+      "dest": "api/fetch_and_store.py"
     },
     {
       "src": "/api",
@@ -19,7 +19,11 @@
       "src": "/",
       "dest": "index.py"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/fetch_and_store",
+      "schedule": "0 5 * * *"
+    }
   ]
-      }
-
-  
+}
