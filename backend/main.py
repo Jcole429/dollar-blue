@@ -1,8 +1,8 @@
 import time
 import schedule
+import sys
 from fetch_data import fetch_latest_blue, fetch_latest_crypto
 from db_utils import check_and_insert_data
-from logger import logger
 
 
 def fetch_and_store():
@@ -16,7 +16,7 @@ def fetch_and_store():
         check_and_insert_data(data_2["type"], data_2["source"], data_2["updated_date"], data_2["buy"], data_2["sell"])
 
     except Exception as e:
-        logger.error(f"Error during fetch and store: {e}")
+        print(f"Error during fetch and store: {e}", file=sys.stderr)
 
 
 # Schedule the job to run every 5 minutes

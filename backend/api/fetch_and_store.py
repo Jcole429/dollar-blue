@@ -1,6 +1,5 @@
 from fetch_data import fetch_latest_blue, fetch_latest_crypto
 from db_utils import check_and_insert_data
-from logger import logger
 from http.server import BaseHTTPRequestHandler
 
 

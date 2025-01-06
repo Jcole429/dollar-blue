@@ -1,9 +1,9 @@
 
 import os
+import sys
 from sqlalchemy import create_engine, Column, Integer, Numeric, Date, DateTime, Text
 from sqlalchemy.orm import declarative_base, sessionmaker
 from datetime import datetime
-from logger import logger
 from dotenv import load_dotenv
 
 # Load environment variables from the .env file
@@ -42,7 +42,7 @@ def check_and_insert_data(type, source, updated_date, buy, sell):
         # Check if the record already exists
         existing_record = session.query(ExchangeData).filter_by(type=type, source=source, updated_date=updated_date).first()
         if existing_record:
-            logger.info(f"Data for {type} from {source} at {updated_date} already exists.")
+            print(f"Data for {type} from {source} at {updated_date} already exists.")
             return
 
         # Insert new record
@@ -57,9 +57,9 @@ def check_and_insert_data(type, source, updated_date, buy, sell):
         )
         session.add(new_record)
         session.commit()
-        logger.info(f"Inserted data for {type} from {source} at {updated_date}.")
+        print(f"Inserted data for {type} from {source} at {updated_date}.")
     except Exception as e:
-        logger.error(f"Database error: {e}")
+        print(f"Database error: {e}", file=sys.stderr)
         session.rollback()
     finally:
         session.close()

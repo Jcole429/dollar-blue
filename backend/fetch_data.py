@@ -1,9 +1,8 @@
 import requests
-from logger import logger
 
 
 def fetch_latest_blue(api_url="https://dolarapi.com/v1/dolares/blue") -> dict:
-    logger.info("Fetching latest blue")
+    print("Fetching latest blue")
     response = requests.get(api_url)
     if response.status_code == 200:
         data = response.json()
@@ -19,7 +18,7 @@ def fetch_latest_blue(api_url="https://dolarapi.com/v1/dolares/blue") -> dict:
 
 
 def fetch_latest_crypto(api_url="https://dolarapi.com/v1/dolares/cripto") -> dict:
-    logger.info("Fetching latest crypto")
+    print("Fetching latest crypto")
     response = requests.get(api_url)
     if response.status_code == 200:
         data = response.json()
