@@ -8,4 +8,3 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/plain')
         self.end_headers()
         self.wfile.write('Dollar Blue backend'.encode('utf-8'))
-        return
