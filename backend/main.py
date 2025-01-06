@@ -23,7 +23,8 @@ def fetch_and_store():
 schedule.every(5).minutes.do(fetch_and_store)
 
 if __name__ == "__main__":
-    logger.info("Starting the scheduler...")
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    # logger.info("Starting the scheduler...")
+    # while True:
+    #     schedule.run_pending()
+    #     time.sleep(1)
+    fetch_and_store()
