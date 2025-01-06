@@ -258,156 +258,158 @@ const PaymentSplitter: React.FC = () => {
   }, [totalPaymentValue]);
 
   return (
-    <div className="section row border pb-2 mx-0">
-      <div className="col">
-        <div className="row">
-          <div className="col">
-            <h2 className="pt-2">Payment Splitter</h2>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col">
-            <p>
-              Calculates the maximum amount of USD you can pay in increments of
-              $100 and displays the remaining amount owed in ARS.
-            </p>
-          </div>
-        </div>
-        <div className="row pt-2">
-          <div className="col">
-            <h5 className="">Instructions:</h5>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col">
-            <ol className="list-decimal list-inside">
-              <li>Enter the total payment amount in ARS.</li>
-              <li>
-                Optionally, enter an initial payment in ARS before calculating
-                the USD payment.
-              </li>
-              <li>Optionally, enter the max amount of USD to use.</li>
-            </ol>
-          </div>
-        </div>
-        <div className="row grid gap-2 px-2">
-          <div className="col-md border py-2">
-            <div className="row pb-2">
-              <div className="col">
-                <label className="">Total Payment</label>
-              </div>
+    <div className="container p-4 mb-2 border rounded shadow-sm bg-light">
+      <div className="row">
+        <div className="col">
+          <div className="row">
+            <div className="col">
+              <h2 className="pt-2">Payment Splitter</h2>
             </div>
-            <div className="row">
-              <div className="col input-group">
-                <span className="input-group-text">ARS</span>
+          </div>
+          <div className="row">
+            <div className="col">
+              <p>
+                Calculates the maximum amount of USD you can pay in increments
+                of $100 and displays the remaining amount owed in ARS.
+              </p>
+            </div>
+          </div>
+          <div className="row pt-2">
+            <div className="col">
+              <h5 className="">Instructions:</h5>
+            </div>
+          </div>
+          <div className="row">
+            <div className="col">
+              <ol className="list-decimal list-inside">
+                <li>Enter the total payment amount in ARS.</li>
+                <li>
+                  Optionally, enter an initial payment in ARS before calculating
+                  the USD payment.
+                </li>
+                <li>Optionally, enter the max amount of USD to use.</li>
+              </ol>
+            </div>
+          </div>
+          <div className="row grid gap-2 px-2">
+            <div className="col-md border py-2">
+              <div className="row pb-2">
+                <div className="col">
+                  <label className="">Total Payment</label>
+                </div>
+              </div>
+              <div className="row">
+                <div className="col input-group">
+                  <span className="input-group-text">ARS</span>
 
-                <input
-                  type="text"
-                  value={totalPaymentARSInput}
-                  onChange={handleTotalPaymentChange}
-                  placeholder=""
-                  className="form-control border"
-                />
+                  <input
+                    type="text"
+                    value={totalPaymentARSInput}
+                    onChange={handleTotalPaymentChange}
+                    placeholder=""
+                    className="form-control border"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="col-md border py-2">
+              <div className="row pb-2">
+                <div className="col">
+                  <label className="">First Payment</label>
+                </div>
+              </div>
+              <div className="row">
+                <div className="col input-group">
+                  <span className="input-group-text">ARS</span>
+                  <input
+                    type="text"
+                    value={maxFirstPaymentARSInput}
+                    onChange={handleMaxFirstPaymentChange}
+                    placeholder=""
+                    className="form-control border"
+                  />
+                </div>
+              </div>
+              <div className="row">
+                <div className="col">
+                  {errorMessage && (
+                    <p className="text-red-500 mt-2">{errorMessage}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="col-md border py-2">
+              <div className="row pb-2">
+                <div className="col">
+                  <label className="">USD Limit</label>
+                </div>
+              </div>
+              <div className="row">
+                <div className="col input-group">
+                  <span className="input-group-text">USD</span>
+                  <input
+                    type="text"
+                    value={usdLimitInput}
+                    onChange={handleUsdLimitChange}
+                    placeholder=""
+                    className="form-control border"
+                  />
+                </div>
               </div>
             </div>
           </div>
-          <div className="col-md border py-2">
-            <div className="row pb-2">
-              <div className="col">
-                <label className="">First Payment</label>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col input-group">
-                <span className="input-group-text">ARS</span>
-                <input
-                  type="text"
-                  value={maxFirstPaymentARSInput}
-                  onChange={handleMaxFirstPaymentChange}
-                  placeholder=""
-                  className="form-control border"
-                />
-              </div>
-            </div>
-            <div className="row">
-              <div className="col">
-                {errorMessage && (
-                  <p className="text-red-500 mt-2">{errorMessage}</p>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="col-md border py-2">
-            <div className="row pb-2">
-              <div className="col">
-                <label className="">USD Limit</label>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col input-group">
-                <span className="input-group-text">USD</span>
-                <input
-                  type="text"
-                  value={usdLimitInput}
-                  onChange={handleUsdLimitChange}
-                  placeholder=""
-                  className="form-control border"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="row pt-2">
-          <div className="col px-2">
-            <table className="table table-bordered text-center mb-0">
-              <thead>
-                <tr>
-                  <th scope="col" className="col-1">
-                    Payment
-                  </th>
-                  <th scope="col" className="col">
-                    Value ARS
-                  </th>
-                  <th scope="col" className="col">
-                    Value USD
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {prePaymentExists && (
+          <div className="row pt-2">
+            <div className="col px-2">
+              <table className="table table-bordered text-center mb-0">
+                <thead>
                   <tr>
-                    <td className="">1</td>
-                    <td className="table-active">{payment1ArsLabel}</td>
-                    <td className="">{payment1UsdLabel}</td>
+                    <th scope="col" className="col-1">
+                      Payment
+                    </th>
+                    <th scope="col" className="col">
+                      Value ARS
+                    </th>
+                    <th scope="col" className="col">
+                      Value USD
+                    </th>
                   </tr>
-                )}
-                {displayUsdPayment && (
+                </thead>
+                <tbody>
+                  {prePaymentExists && (
+                    <tr>
+                      <td className="">1</td>
+                      <td className="table-active">{payment1ArsLabel}</td>
+                      <td className="">{payment1UsdLabel}</td>
+                    </tr>
+                  )}
+                  {displayUsdPayment && (
+                    <tr>
+                      <td className="">
+                        {prePaymentExists && 2}
+                        {!prePaymentExists && 1}
+                      </td>
+                      <td className="">{payment2ArsLabel}</td>
+                      <td className="table-active">{payment2UsdLabel}</td>
+                    </tr>
+                  )}
                   <tr>
                     <td className="">
-                      {prePaymentExists && 2}
-                      {!prePaymentExists && 1}
+                      {prePaymentExists && displayUsdPayment && 3}
+                      {prePaymentExists && !displayUsdPayment && 2}
+                      {!prePaymentExists && displayUsdPayment && 2}
+                      {!prePaymentExists && !displayUsdPayment && 1}
                     </td>
-                    <td className="">{payment2ArsLabel}</td>
-                    <td className="table-active">{payment2UsdLabel}</td>
+                    <td className="table-active">{payment3ArsLabel}</td>
+                    <td className="">{payment3UsdLabel}</td>
                   </tr>
-                )}
-                <tr>
-                  <td className="">
-                    {prePaymentExists && displayUsdPayment && 3}
-                    {prePaymentExists && !displayUsdPayment && 2}
-                    {!prePaymentExists && displayUsdPayment && 2}
-                    {!prePaymentExists && !displayUsdPayment && 1}
-                  </td>
-                  <td className="table-active">{payment3ArsLabel}</td>
-                  <td className="">{payment3UsdLabel}</td>
-                </tr>
-                <tr className="fw-bold">
-                  <td className="">Total</td>
-                  <td className="">{paymentTotalArsLabel}</td>
-                  <td className="">{paymentTotalUsdLabel}</td>
-                </tr>
-              </tbody>
-            </table>
+                  <tr className="fw-bold">
+                    <td className="">Total</td>
+                    <td className="">{paymentTotalArsLabel}</td>
+                    <td className="">{paymentTotalUsdLabel}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

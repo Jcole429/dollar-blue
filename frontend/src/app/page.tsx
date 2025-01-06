@@ -18,10 +18,16 @@ export default function Home() {
               <h1 className="p-2 mb-2">Dollar Blue</h1>
             </div>
           </div>
-          <div className="row">
+          <div className="row px-2">
             <div className="col-lg-4">
-              <LatestRateDisplay rateType="blue" />
-              <LatestRateDisplay rateType="crypto" />
+              <div className="row">
+                <div className="col">
+                  <LatestRateDisplay rateType="blue" />
+                </div>
+                <div className="col">
+                  <LatestRateDisplay rateType="crypto" />
+                </div>
+              </div>
             </div>
             <div className="col">
               <RateSelector />
