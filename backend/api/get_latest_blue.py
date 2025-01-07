@@ -12,6 +12,8 @@ class handler(BaseHTTPRequestHandler):
 
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')  # Allow all origins
+
             self.end_headers()
 
             self.wfile.write(json_data.encode('utf-8'))
@@ -21,6 +23,8 @@ class handler(BaseHTTPRequestHandler):
 
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')  # Allow all origins
+
             self.end_headers()
 
             error_response = json.dumps({"error": "Internal Server Error", "details": str(e)})
