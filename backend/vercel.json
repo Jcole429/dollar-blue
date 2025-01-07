@@ -6,7 +6,7 @@
       "use": "@vercel/python"
     },
     {
-      "src": "api/get_data.py",
+      "src": "api/get_latest_blue.py",
       "use": "@vercel/python"
     }
   ],
