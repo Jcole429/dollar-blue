@@ -12,6 +12,10 @@
       "dest": "api/fetch_and_store.py"
     },
     {
+      "src": "/api/get_latest_blue",
+      "dest": "api/get_latest_blue.py"
+    },
+    {
       "src": "/api",
       "dest": "api/index.py"
     },

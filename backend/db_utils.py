@@ -63,3 +63,20 @@ def check_and_insert_data(type, source, updated_date, buy, sell):
         session.rollback()
     finally:
         session.close()
+
+
+def get_latest_blue():
+    type = "Blue"
+
+    try:
+        session = SessionLocal()
+        record = session.query(ExchangeData).filter_by(type=type).order_by(ExchangeData.updated_date.desc()).first()
+        data = {"buy": record.buy.__str__(), "sell": record.sell.__str__(), "avg": record.avg.__str__(),
+                "updated_date": record.updated_date.__str__(), "source": record.source.__str__()}
+        return data
+    except Exception as e:
+        print(f"Database error: {e}", file=sys.stderr)
+        session.rollback()
+
+    finally:
+        session.close()
