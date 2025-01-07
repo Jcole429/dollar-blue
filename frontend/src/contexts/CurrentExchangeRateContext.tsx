@@ -85,18 +85,15 @@ export const CurrentExchangeRateProvider: React.FC<
       try {
         console.log("Fetching latest data from API.");
         const response = await axios.get(
-          "https://dolarapi.com/v1/dolares/blue"
+          "https://dollar-blue-backend.vercel.app/api/get_latest_blue"
         );
         const response_data = response.data;
         // console.log("response: ", response_data);
-        setExchangeRateBlueLastUpdated(
-          new Date(response_data["fechaActualizacion"])
-        );
+        setExchangeRateBlueLastUpdated(new Date(response_data["updated_date"]));
 
-        // Round buy and sell values to 2 decimal places
-        const buy = Math.round(response_data["compra"] * 100) / 100;
-        const sell = Math.round(response_data["venta"] * 100) / 100;
-        const avg = Math.round(((buy + sell) / 2) * 100) / 100;
+        const buy = response_data["buy"];
+        const sell = response_data["sell"];
+        const avg = response_data["avg"];
 
         setExchangeRateBlueBuy(buy);
         setExchangeRateBlueSell(sell);
@@ -110,18 +107,17 @@ export const CurrentExchangeRateProvider: React.FC<
       try {
         console.log("Fetching latest data from API.");
         const response = await axios.get(
-          "https://dolarapi.com/v1/dolares/cripto"
+          "https://dollar-blue-backend.vercel.app/api/get_latest_crypto"
         );
         const response_data = response.data;
         // console.log(response_data);
         setExchangeRateCryptoLastUpdated(
-          new Date(response_data["fechaActualizacion"])
+          new Date(response_data["updated_date"])
         );
 
-        // Round buy and sell values to 2 decimal places
-        const buy = Math.round(response_data["compra"] * 100) / 100;
-        const sell = Math.round(response_data["venta"] * 100) / 100;
-        const avg = Math.round(((buy + sell) / 2) * 100) / 100;
+        const buy = response_data["buy"];
+        const sell = response_data["sell"];
+        const avg = response_data["avg"];
 
         setExchangeRateCryptoBuy(buy);
         setExchangeRateCryptoSell(sell);
