@@ -74,7 +74,8 @@ export const CurrentExchangeRateProvider: React.FC<
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffDays > 0) return `${diffDays} days ago`;
+    if (diffDays > 1) return `${diffDays} days ago`;
+    if (diffDays == 1) return `${diffDays} day ago`;
     if (diffHours > 0) return `${diffHours} hours ago`;
     if (diffMins > 0) return `${diffMins} minutes ago`;
     return "just now";
