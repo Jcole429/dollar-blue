@@ -4,6 +4,10 @@
     {
       "src": "api/fetch_and_store.py",
       "use": "@vercel/python"
+    },
+    {
+      "src": "api/get_data.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
