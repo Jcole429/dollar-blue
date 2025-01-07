@@ -10,8 +10,8 @@ def fetch_latest_blue_dolarapi(api_url="https://dolarapi.com/v1/dolares/blue") -
             "type": "Blue",
             "source": "dolarapi",
             "updated_date": data["fechaActualizacion"],
-            "buy": data["compra"],
-            "sell": data["venta"],
+            "buy": float(data["compra"]),
+            "sell": float(data["venta"]),
         }
     else:
         response.raise_for_status()
@@ -26,8 +26,8 @@ def fetch_latest_blue_bluelytics(api_url="https://api.bluelytics.com.ar/v2/lates
             "type": "Blue",
             "source": "bluelytics",
             "updated_date": data["last_update"],
-            "buy": data["blue"]["value_buy"],
-            "sell": data["blue"]["value_sell"],
+            "buy": float(data["blue"]["value_buy"]),
+            "sell": float(data["blue"]["value_sell"]),
         }
     else:
         response.raise_for_status()
@@ -42,8 +42,8 @@ def fetch_latest_crypto(api_url="https://dolarapi.com/v1/dolares/cripto") -> dic
             "type": "Crypto",
             "source": "dolarapi",
             "updated_date": data["fechaActualizacion"],
-            "buy": data["compra"],
-            "sell": data["venta"],
+            "buy": float(data["compra"]),
+            "sell": float(data["venta"]),
         }
     else:
         response.raise_for_status()
