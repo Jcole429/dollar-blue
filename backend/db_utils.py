@@ -65,9 +65,7 @@ def check_and_insert_data(type, source, updated_date, buy, sell):
         session.close()
 
 
-def get_latest_blue():
-    type = "Blue"
-
+def get_latest(type: str):
     try:
         session = SessionLocal()
         record = session.query(ExchangeData).filter_by(type=type).order_by(ExchangeData.updated_date.desc()).first()

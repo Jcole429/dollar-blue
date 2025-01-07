@@ -7,7 +7,7 @@ from http.server import BaseHTTPRequestHandler
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
-            data = get_latest("Blue")
+            data = get_latest("Crypto")
             json_data = json.dumps(data)
 
             self.send_response(200)
@@ -18,7 +18,7 @@ class handler(BaseHTTPRequestHandler):
 
             self.wfile.write(json_data.encode('utf-8'))
         except Exception as e:
-            error = f"Error during get_latest_blue(): {e}"
+            error = f"Error during get_latest_crypto(): {e}"
             print(error, file=sys.stderr)
 
             self.send_response(500)
