@@ -21,10 +21,11 @@ const RateSelector: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  const maxDate = yesterday.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+  const getMaxDate = () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return yesterday.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+  };
 
   const fetchHistoricalRate = async (rateType: string, date: string) => {
     setLoading(true);
@@ -246,7 +247,7 @@ const RateSelector: React.FC = () => {
             className="form-control"
             value={selectedDate}
             onChange={handleDateChange}
-            max={maxDate} // Restricts the date to today or earlier
+            max={getMaxDate()} // Restricts the date to today or earlier
             disabled={rateOption === "current" || selectedRateType === "custom"}
           />
         </div>
