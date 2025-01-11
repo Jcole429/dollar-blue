@@ -96,18 +96,25 @@ const RateSelector: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const date = event.target.value;
-    setSelectedDate(date);
+    const maxDate = getMaxDate();
 
-    if (rateOption === "historical" && date) {
-      try {
-        const historical_rate = await fetchHistoricalRate(
-          selectedRateType,
-          date
-        );
-        console.log("Received value: ", historical_rate);
-        setExchangeRateToUse(historical_rate);
-      } catch (error) {
-        console.error(`Error fetching historical rate:`, error);
+    if (date > maxDate) {
+      alert(`Please select a date on or before ${maxDate}`);
+      setSelectedDate(maxDate);
+    } else {
+      setSelectedDate(date);
+
+      if (rateOption === "historical" && date) {
+        try {
+          const historical_rate = await fetchHistoricalRate(
+            selectedRateType,
+            date
+          );
+          console.log("Received value: ", historical_rate);
+          setExchangeRateToUse(historical_rate);
+        } catch (error) {
+          console.error(`Error fetching historical rate:`, error);
+        }
       }
     }
   };
