@@ -4,11 +4,23 @@ import React, { useState } from "react";
 import { useExchangeRateToUse } from "@/contexts/ExchangeRateToUseContext";
 import { useCurrentExchangeRateContext } from "@/contexts/CurrentExchangeRateContext";
 import axios from "axios";
+import { formatDate } from "@/utils/format_date";
 
 const RateSelector: React.FC = () => {
-  const { setExchangeRateToUse, exchangeRateToUse } = useExchangeRateToUse();
-  const { exchangeRateBlueAvg, exchangeRateCryptoAvg } =
-    useCurrentExchangeRateContext();
+  const {
+    setExchangeRateToUseValue: setExchangeRateToUse,
+    setExchangeRateToUseType: setExchangeRateToUseType,
+    setExchangeRateToUseUpdatedDate: setExchangeRateToUseUpdatedDate,
+    exchangeRateToUseValue: exchangeRateToUseValue,
+    exchangeRateToUseUpdatedDate: exchangeRateToUseUpdatedDate,
+    exchangeRateToUseType: exchangeRateToUseType,
+  } = useExchangeRateToUse();
+  const {
+    exchangeRateBlueAvg,
+    exchangeRateBlueLastUpdated,
+    exchangeRateCryptoAvg,
+    exchangeRateCryptoLastUpdated,
+  } = useCurrentExchangeRateContext();
 
   const [selectedRateType, setSelectedRateType] = useState<
     "blue" | "cripto" | "custom"
@@ -58,7 +70,10 @@ const RateSelector: React.FC = () => {
     setSelectedRateType(type);
 
     if (type === "custom") {
+      setRateOption("current");
       setExchangeRateToUse(customRate || null); // Use custom rate if selected
+      setExchangeRateToUseType(type);
+      setExchangeRateToUseUpdatedDate(new Date());
     } else if (rateOption === "current") {
       const rate =
         type === "blue"
@@ -66,19 +81,38 @@ const RateSelector: React.FC = () => {
           : type === "cripto"
           ? exchangeRateCryptoAvg
           : null;
+      const date =
+        type === "blue"
+          ? exchangeRateBlueLastUpdated
+          : type === "cripto"
+          ? exchangeRateCryptoLastUpdated
+          : null;
       setExchangeRateToUse(rate ?? null);
+      setExchangeRateToUseType(type);
+      setExchangeRateToUseUpdatedDate(date);
     } else if (rateOption === "historical") {
-      if (selectedDate === undefined) return;
+      if (selectedDate === undefined || selectedDate.trim() === "") return;
       try {
-        const rate = await fetchHistoricalRate(selectedRateType, selectedDate);
+        setExchangeRateToUseType(type);
+        const rate = await fetchHistoricalRate(
+          exchangeRateToUseType!,
+          selectedDate
+        );
+
         setExchangeRateToUse(rate ?? null);
+
+        const [year, month, day] = selectedDate.split("-");
+        const date_object = new Date(selectedDate);
+        date_object.setHours(12);
+        date_object.setDate(Number(day));
+        setExchangeRateToUseUpdatedDate(date_object);
       } catch (error) {
         console.error(`Error fetching historical rate:`, error);
       }
     }
   };
 
-  const handleRateOptionChange = (option: "current" | "historical") => {
+  const handleRateOptionChange = async (option: "current" | "historical") => {
     setRateOption(option);
 
     if (option === "current") {
@@ -86,9 +120,33 @@ const RateSelector: React.FC = () => {
         selectedRateType === "blue"
           ? exchangeRateBlueAvg
           : exchangeRateCryptoAvg;
+      const date =
+        selectedRateType === "blue"
+          ? exchangeRateBlueLastUpdated
+          : selectedRateType === "cripto"
+          ? exchangeRateCryptoLastUpdated
+          : null;
       setExchangeRateToUse(rate ?? null);
+      setExchangeRateToUseType(selectedRateType);
+      setExchangeRateToUseUpdatedDate(date);
     } else {
-      setExchangeRateToUse(null); // Reset the rate for historical until a date is selected
+      if (selectedDate === undefined || selectedDate.trim() === "") {
+        setExchangeRateToUse(null); // Reset the rate for historical until a date is selected
+        return;
+      }
+      try {
+        const rate = await fetchHistoricalRate(selectedRateType, selectedDate);
+        setExchangeRateToUse(rate ?? null);
+        setExchangeRateToUseType(selectedRateType);
+
+        const [year, month, day] = selectedDate.split("-");
+        const date_object = new Date(selectedDate);
+        date_object.setHours(12);
+        date_object.setDate(Number(day));
+        setExchangeRateToUseUpdatedDate(date_object);
+      } catch (error) {
+        console.error(`Error fetching historical rate:`, error);
+      }
     }
   };
 
@@ -110,8 +168,15 @@ const RateSelector: React.FC = () => {
             selectedRateType,
             date
           );
-          console.log("Received value: ", historical_rate);
+
           setExchangeRateToUse(historical_rate);
+          setExchangeRateToUseType(selectedRateType);
+
+          const [year, month, day] = date.split("-");
+          const date_object = new Date(date);
+          date_object.setHours(12);
+          date_object.setDate(Number(day));
+          setExchangeRateToUseUpdatedDate(date_object);
         } catch (error) {
           console.error(`Error fetching historical rate:`, error);
         }
@@ -259,7 +324,9 @@ const RateSelector: React.FC = () => {
           />
         </div>
       </div>
-      <div className="row">Using Rate: {exchangeRateToUse}</div>
+      <div className="row">{`Using ${exchangeRateToUseType} rate ${exchangeRateToUseValue} from ${formatDate(
+        exchangeRateToUseUpdatedDate!
+      )}`}</div>
     </div>
   );
 };

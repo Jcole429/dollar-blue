@@ -6,7 +6,7 @@ import { Currency } from "../models/Currency"; // Adjust the import path as need
 import { useExchangeRateToUse } from "@/contexts/ExchangeRateToUseContext";
 
 const PaymentSplitter: React.FC = () => {
-  const { exchangeRateToUse } = useExchangeRateToUse();
+  const { exchangeRateToUseValue: exchangeRateToUse } = useExchangeRateToUse();
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 

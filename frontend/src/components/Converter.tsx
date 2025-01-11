@@ -5,7 +5,7 @@ import { formatCurrencyARS, formatCurrencyUSD } from "../utils/format_currency";
 import { useExchangeRateToUse } from "@/contexts/ExchangeRateToUseContext";
 
 const Converter: React.FC = () => {
-  const { exchangeRateToUse } = useExchangeRateToUse();
+  const { exchangeRateToUseValue: exchangeRateToUse } = useExchangeRateToUse();
 
   const [usdToArsInput, setUsdToArsInput] = useState<string>("");
   const [usdToArsValue, setUsdToArsValue] = useState<number | null>(null);
