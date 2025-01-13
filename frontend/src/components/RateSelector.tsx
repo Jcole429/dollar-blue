@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useExchangeRateToUse } from "@/contexts/ExchangeRateToUseContext";
 import { useCurrentExchangeRateContext } from "@/contexts/CurrentExchangeRateContext";
 import axios from "axios";
@@ -32,6 +32,7 @@ const RateSelector: React.FC = () => {
   const [customRate, setCustomRate] = useState<number | "">("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const [maxDate, setMaxDate] = useState<string>("");
 
   const getMaxDate = () => {
     const yesterday = new Date();
@@ -195,6 +196,12 @@ const RateSelector: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    // Update max date whenever the component mounts
+    const newMaxDate = getMaxDate();
+    setMaxDate(newMaxDate);
+  }, []); // Empty dependency array ensures this runs only once on mount
+
   return (
     <div className="container p-4 mb-2 border rounded shadow-sm bg-light">
       <div className="row">
@@ -319,7 +326,7 @@ const RateSelector: React.FC = () => {
             className="form-control"
             value={selectedDate}
             onChange={handleDateChange}
-            max={getMaxDate()} // Restricts the date to today or earlier
+            max={maxDate} // Restricts the date to today or earlier
             disabled={rateOption === "current" || selectedRateType === "custom"}
           />
         </div>
