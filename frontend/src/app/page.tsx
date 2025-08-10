@@ -15,7 +15,7 @@ export default function Home() {
         >
           <div className="row">
             <div className="col">
-              <h1 className="p-2 mb-2">Dollar Blue</h1>
+              {/* <h1 className="p-2 mb-2">Dollar Blue</h1> */}
             </div>
           </div>
           <div className="row px-2">
