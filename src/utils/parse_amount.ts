@@ -25,11 +25,15 @@ const DECIMAL_PLACES = 2;
  *   (a) exactly 3 digits follow it, to end of string
  *   (b) at least one digit precedes it
  *   (c) the other separator character appears nowhere in the input
- *   (d) the digit run before it does not start with `0`
+ *   (d) what precedes it is not a bare digit run starting with `0`
  * in which case it is a grouping separator.
  *
  * So `1.234` and `1,234` are 1234, while `0,999` is 0.999 (rule d) and `1,234.567`
  * is 1234.567 (rule c). See parse_amount.test.ts for the full table.
+ *
+ * Rule (d) is anchored to the *whole* integer part, not to the last group. Anchored
+ * per-group it also fired on the `000` inside `5.000.000`, which then parsed as
+ * 5000 — a silent factor-of-1000 error on the most ordinary peso amount there is.
  */
 export function parseAmount(input: string): number | null {
   if (typeof input !== "string") return null;
@@ -74,7 +78,7 @@ export function parseAmount(input: string): number | null {
       after.length === 3 && // (a) exactly three digits follow
       before.length > 0 && // (b) something precedes it
       !s.includes(otherChar) && // (c) only one separator character in play
-      !/(^|[.,])0\d*$/.test(before); // (d) preceding digit run doesn't start with 0
+      !/^0\d*$/.test(before); // (d) integer part isn't a bare 0-leading digit run
 
     if (looksLikeGrouping) {
       intPart = s;
