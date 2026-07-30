@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useState, ReactNode, useContext } from "react";
+import React, {
+  createContext,
+  useState,
+  useMemo,
+  ReactNode,
+  useContext,
+} from "react";
 import { useCurrentExchangeRateContext } from "@/contexts/CurrentExchangeRateContext";
 import type { SelectedRateType } from "@/types/rates";
 
@@ -42,15 +48,21 @@ export const ExchangeRateToUseProvider: React.FC<{ children: ReactNode }> = ({
       ? { type: "blue", value: blue.avg, updatedDate: blue.lastUpdated }
       : { type: "blue", value: null, updatedDate: null });
 
+  // Memoised on the three primitives rather than on `effective`, which is rebuilt
+  // every render. Without this a re-render of the provider — for any reason at
+  // all — re-rendered the converter, the splitter and the selector with it.
+  const value = useMemo(
+    () => ({
+      exchangeRateToUseValue: effective.value,
+      exchangeRateToUseType: effective.type,
+      exchangeRateToUseUpdatedDate: effective.updatedDate,
+      setSelection,
+    }),
+    [effective.value, effective.type, effective.updatedDate]
+  );
+
   return (
-    <ExchangeRateToUseContext.Provider
-      value={{
-        exchangeRateToUseValue: effective.value,
-        exchangeRateToUseType: effective.type,
-        exchangeRateToUseUpdatedDate: effective.updatedDate,
-        setSelection,
-      }}
-    >
+    <ExchangeRateToUseContext.Provider value={value}>
       {children}
     </ExchangeRateToUseContext.Provider>
   );
