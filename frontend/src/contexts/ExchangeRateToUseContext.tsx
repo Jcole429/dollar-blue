@@ -2,65 +2,53 @@
 
 import React, { createContext, useState, ReactNode, useContext } from "react";
 import { useCurrentExchangeRateContext } from "@/contexts/CurrentExchangeRateContext";
+import type { SelectedRateType } from "@/types/rates";
 
-// Define types for the context
+/** An explicit choice the user has made in the rate selector. */
+export interface RateSelection {
+  type: SelectedRateType;
+  value: number | null;
+  updatedDate: Date | null;
+}
+
 interface ExchangeRateToUseContextProps {
+  /** The rate every calculator uses. Falls back to the live blue average. */
   exchangeRateToUseValue: number | null;
-  exchangeRateToUseType: string | null;
+  exchangeRateToUseType: SelectedRateType | null;
   exchangeRateToUseUpdatedDate: Date | null;
-  setExchangeRateToUseValue: (rate: number | null) => void;
-  setExchangeRateToUseType: (type: string | null) => void;
-  setExchangeRateToUseUpdatedDate: (date: Date | null) => void;
+  /** `null` means "no explicit choice yet", which is not the same as a choice that resolved to null. */
+  setSelection: (selection: RateSelection | null) => void;
 }
 
 export const ExchangeRateToUseContext = createContext<
   ExchangeRateToUseContextProps | undefined
 >(undefined);
 
-interface ExchangeRateToUseProviderProps {
-  children: ReactNode;
-}
-
 export const ExchangeRateToUseProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const { exchangeRateBlueAvg, exchangeRateBlueLastUpdated } =
-    useCurrentExchangeRateContext(); // Access ExchangeRateBlueAvg from CurrentExchangeRateContext
+  const { rates } = useCurrentExchangeRateContext();
 
-  // Initialize exchangeRateToUse with the value of exchangeRateBlueAvg
-  const [exchangeRateToUseValue, setExchangeRateToUseValue] = useState<
-    number | null
-  >(exchangeRateBlueAvg);
+  // Storing the whole selection as one nullable object keeps "nothing chosen
+  // yet" distinguishable from "chose a date the API has no rate for". The old
+  // shape seeded state from a prop and then back-filled it, so any later null
+  // silently snapped the user back to blue.
+  const [selection, setSelection] = useState<RateSelection | null>(null);
 
-  const [exchangeRateToUseUpdatedDate, setExchangeRateToUseUpdatedDate] =
-    useState<Date | null>(exchangeRateBlueLastUpdated);
-
-  const [exchangeRateToUseType, setExchangeRateToUseType] = useState<
-    string | null
-  >("blue");
-
-  React.useEffect(() => {
-    // Update exchangeRateToUse if exchangeRateBlueAvg changes and exchangeRateToUse is still null
-    if (exchangeRateToUseValue === null && exchangeRateBlueAvg !== null) {
-      setExchangeRateToUseValue(exchangeRateBlueAvg);
-      setExchangeRateToUseUpdatedDate(exchangeRateBlueLastUpdated);
-      setExchangeRateToUseType("blue");
-    }
-  }, [
-    exchangeRateBlueAvg,
-    exchangeRateBlueLastUpdated,
-    exchangeRateToUseValue,
-  ]);
+  const blue = rates.blue;
+  const effective: RateSelection =
+    selection ??
+    (blue
+      ? { type: "blue", value: blue.avg, updatedDate: blue.lastUpdated }
+      : { type: "blue", value: null, updatedDate: null });
 
   return (
     <ExchangeRateToUseContext.Provider
       value={{
-        exchangeRateToUseValue: exchangeRateToUseValue,
-        exchangeRateToUseType: exchangeRateToUseType,
-        exchangeRateToUseUpdatedDate: exchangeRateToUseUpdatedDate,
-        setExchangeRateToUseValue: setExchangeRateToUseValue,
-        setExchangeRateToUseType: setExchangeRateToUseType,
-        setExchangeRateToUseUpdatedDate: setExchangeRateToUseUpdatedDate,
+        exchangeRateToUseValue: effective.value,
+        exchangeRateToUseType: effective.type,
+        exchangeRateToUseUpdatedDate: effective.updatedDate,
+        setSelection,
       }}
     >
       {children}
@@ -68,7 +56,6 @@ export const ExchangeRateToUseProvider: React.FC<{ children: ReactNode }> = ({
   );
 };
 
-// Custom hook for convenience
 export const useExchangeRateToUse = () => {
   const context = useContext(ExchangeRateToUseContext);
   if (!context) {
