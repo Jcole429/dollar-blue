@@ -23,12 +23,6 @@ export const RATE_SLUG: Record<RateType, string> = {
   crypto: "cripto",
 };
 
-/** Endpoint on our own backend for the latest quote. */
-export const BACKEND_PATH: Record<RateType, string> = {
-  blue: "get_latest_blue",
-  crypto: "get_latest_crypto",
-};
-
 export const RATE_LABEL: Record<RateType, string> = {
   blue: "Dólar Blue",
   crypto: "Dólar Cripto",
