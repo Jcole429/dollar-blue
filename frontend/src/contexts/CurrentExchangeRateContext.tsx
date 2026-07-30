@@ -8,157 +8,132 @@ import React, {
   ReactNode,
 } from "react";
 import axios from "axios";
+import {
+  BACKEND_PATH,
+  RATE_TYPES,
+  type RateSnapshot,
+  type RateType,
+} from "@/types/rates";
+import { toNumber } from "@/utils/rate";
+import { parseApiTimestamp } from "@/utils/format_date";
 
-// Define the context and the provider props type
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "https://dollar-blue-backend.vercel.app";
+
+/** How often the "x minutes ago" labels are recomputed. */
+const TICK_MS = 60_000;
+
 interface CurrentExchangeRateContextProps {
-  exchangeRateBlueAvg: number | null;
-  exchangeRateBlueBuy: number | null;
-  exchangeRateBlueSell: number | null;
-  exchangeRateBlueLastUpdated: Date | null;
-  exchangeRateBlueTimeSinceLastUpdate: string | null;
-  exchangeRateCryptoAvg: number | null;
-  exchangeRateCryptoBuy: number | null;
-  exchangeRateCryptoSell: number | null;
-  exchangeRateCryptoLastUpdated: Date | null;
-  exchangeRateCryptoTimeSinceLastUpdate: string | null;
+  rates: Record<RateType, RateSnapshot | null>;
+  loading: boolean;
+  error: string | null;
+  timeSinceUpdate: (rateType: RateType) => string;
 }
 
 export const CurrentExchangeRateContext = createContext<
   CurrentExchangeRateContextProps | undefined
 >(undefined);
 
-interface CurrentExchangeRateProviderProps {
-  children: ReactNode;
-}
+const describeAge = (lastUpdated: Date | null, now: number): string => {
+  if (!lastUpdated) return "Never updated";
 
-export const CurrentExchangeRateProvider: React.FC<
-  CurrentExchangeRateProviderProps
-> = ({ children }) => {
-  const [exchangeRateBlueLastUpdated, setExchangeRateBlueLastUpdated] =
-    useState<Date | null>(null);
-  const [
-    exchangeRateBlueTimeSinceLastUpdate,
-    setExchangeRateBlueTimeSinceLastUpdate,
-  ] = useState<string>("");
-  const [exchangeRateBlueAvg, setExchangeRateBlueAvg] = useState<number | null>(
-    null
-  );
-  const [exchangeRateBlueBuy, setExchangeRateBlueBuy] = useState<number | null>(
-    null
-  );
-  const [exchangeRateBlueSell, setExchangeRateBlueSell] = useState<
-    number | null
-  >(null);
+  const diffMins = Math.floor((now - lastUpdated.getTime()) / 60_000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
 
-  const [exchangeRateCryptoLastUpdated, setExchangeRateCryptoLastUpdated] =
-    useState<Date | null>(null);
-  const [
-    exchangeRateCryptoTimeSinceLastUpdate,
-    setExchangeRateCryptoTimeSinceLastUpdate,
-  ] = useState<string>("");
-  const [exchangeRateCryptoAvg, setExchangeRateCryptoAvg] = useState<
-    number | null
-  >(null);
-  const [exchangeRateCryptoBuy, setExchangeRateCryptoBuy] = useState<
-    number | null
-  >(null);
-  const [exchangeRateCryptoSell, setExchangeRateCryptoSell] = useState<
-    number | null
-  >(null);
+  if (diffDays > 1) return `${diffDays} days ago`;
+  if (diffDays === 1) return "1 day ago";
+  if (diffHours > 1) return `${diffHours} hours ago`;
+  if (diffHours === 1) return "1 hour ago";
+  if (diffMins > 1) return `${diffMins} minutes ago`;
+  if (diffMins === 1) return "1 minute ago";
+  return "just now";
+};
 
-  const calculateTimeSinceUpdate = (lastUpdated: Date | null): string => {
-    if (!lastUpdated) return "Never updated";
-    const now = new Date();
-    const diffMs = now.getTime() - lastUpdated.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
+/** The backend serialises Decimals with `str()`, so every field arrives as text. */
+const toSnapshot = (data: unknown): RateSnapshot | null => {
+  if (typeof data !== "object" || data === null) return null;
+  const record = data as Record<string, unknown>;
 
-    if (diffDays > 1) return `${diffDays} days ago`;
-    if (diffDays == 1) return `${diffDays} day ago`;
-    if (diffHours > 0) return `${diffHours} hours ago`;
-    if (diffMins > 0) return `${diffMins} minutes ago`;
-    return "just now";
+  const buy = toNumber(record.buy);
+  const sell = toNumber(record.sell);
+  const avg = toNumber(record.avg);
+  if (buy === null || sell === null || avg === null) return null;
+
+  return {
+    buy,
+    sell,
+    avg,
+    lastUpdated: parseApiTimestamp(record.updated_date),
   };
+};
+
+export const CurrentExchangeRateProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const [rates, setRates] = useState<Record<RateType, RateSnapshot | null>>({
+    blue: null,
+    crypto: null,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    const fetchBlueValue = async () => {
-      try {
-        console.log("Fetching latest data from API.");
-        const response = await axios.get(
-          "https://dollar-blue-backend.vercel.app/api/get_latest_blue"
-        );
-        const response_data = response.data;
-        // console.log("response: ", response_data);
-        setExchangeRateBlueLastUpdated(new Date(response_data["updated_date"]));
+    const controller = new AbortController();
 
-        const buy = response_data["buy"];
-        const sell = response_data["sell"];
-        const avg = response_data["avg"];
+    const load = async () => {
+      const results = await Promise.all(
+        RATE_TYPES.map(async (rateType) => {
+          try {
+            const response = await axios.get(
+              `${API_BASE_URL}/api/${BACKEND_PATH[rateType]}`,
+              { signal: controller.signal }
+            );
+            return [rateType, toSnapshot(response.data)] as const;
+          } catch (err) {
+            if (!axios.isCancel(err)) {
+              console.error(`Error fetching ${rateType} rate:`, err);
+            }
+            return [rateType, null] as const;
+          }
+        })
+      );
 
-        setExchangeRateBlueBuy(buy);
-        setExchangeRateBlueSell(sell);
-        setExchangeRateBlueAvg(avg);
-      } catch (error) {
-        console.error("Error fetching exchange rates:", error);
-      }
+      if (controller.signal.aborted) return;
+
+      const next = Object.fromEntries(results) as Record<
+        RateType,
+        RateSnapshot | null
+      >;
+      setRates(next);
+      setLoading(false);
+      setError(
+        RATE_TYPES.every((rateType) => next[rateType] === null)
+          ? "Could not load exchange rates. Please try again later."
+          : null
+      );
     };
 
-    const fetchCryptoValue = async () => {
-      try {
-        console.log("Fetching latest data from API.");
-        const response = await axios.get(
-          "https://dollar-blue-backend.vercel.app/api/get_latest_crypto"
-        );
-        const response_data = response.data;
-        // console.log(response_data);
-        setExchangeRateCryptoLastUpdated(
-          new Date(response_data["updated_date"])
-        );
-
-        const buy = response_data["buy"];
-        const sell = response_data["sell"];
-        const avg = response_data["avg"];
-
-        setExchangeRateCryptoBuy(buy);
-        setExchangeRateCryptoSell(sell);
-        setExchangeRateCryptoAvg(avg);
-      } catch (error) {
-        console.error("Error fetching exchange rates:", error);
-      }
-    };
-
-    fetchBlueValue();
-    fetchCryptoValue();
+    load();
+    return () => controller.abort();
   }, []);
 
+  // Keeps the "x minutes ago" labels honest; they used to be computed once and
+  // then stay frozen for the life of the tab.
   useEffect(() => {
-    setExchangeRateBlueTimeSinceLastUpdate(
-      calculateTimeSinceUpdate(exchangeRateBlueLastUpdated)
-    );
-  }, [exchangeRateBlueLastUpdated]);
-
-  useEffect(() => {
-    setExchangeRateCryptoTimeSinceLastUpdate(
-      calculateTimeSinceUpdate(exchangeRateCryptoLastUpdated)
-    );
-  }, [exchangeRateCryptoLastUpdated]);
+    const id = setInterval(() => setNow(Date.now()), TICK_MS);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <CurrentExchangeRateContext.Provider
       value={{
-        exchangeRateBlueAvg,
-        exchangeRateBlueBuy,
-        exchangeRateBlueSell,
-        exchangeRateBlueLastUpdated: exchangeRateBlueLastUpdated,
-        exchangeRateBlueTimeSinceLastUpdate:
-          exchangeRateBlueTimeSinceLastUpdate,
-        exchangeRateCryptoAvg,
-        exchangeRateCryptoBuy,
-        exchangeRateCryptoSell,
-        exchangeRateCryptoLastUpdated: exchangeRateCryptoLastUpdated,
-        exchangeRateCryptoTimeSinceLastUpdate:
-          exchangeRateCryptoTimeSinceLastUpdate,
+        rates,
+        loading,
+        error,
+        timeSinceUpdate: (rateType) =>
+          describeAge(rates[rateType]?.lastUpdated ?? null, now),
       }}
     >
       {children}
@@ -166,12 +141,11 @@ export const CurrentExchangeRateProvider: React.FC<
   );
 };
 
-// Custom hook for convenience
 export const useCurrentExchangeRateContext = () => {
   const context = useContext(CurrentExchangeRateContext);
   if (!context) {
     throw new Error(
-      "useExchangeRateToUse must be used within an ExchangeRateToUseProvider"
+      "useCurrentExchangeRateContext must be used within a CurrentExchangeRateProvider"
     );
   }
   return context;

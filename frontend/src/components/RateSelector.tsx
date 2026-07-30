@@ -1,209 +1,149 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useExchangeRateToUse } from "@/contexts/ExchangeRateToUseContext";
+import React, { useState } from "react";
+import {
+  useExchangeRateToUse,
+  type RateSelection,
+} from "@/contexts/ExchangeRateToUseContext";
 import { useCurrentExchangeRateContext } from "@/contexts/CurrentExchangeRateContext";
-import axios from "axios";
-import { formatDate } from "@/utils/format_date";
+import { useHistoricalRate } from "@/hooks/useHistoricalRate";
+import {
+  formatDate,
+  getMaxHistoricalDate,
+  parseYmdLocal,
+} from "@/utils/format_date";
+import { formatCurrencyARS } from "@/utils/format_currency";
+import {
+  RATE_LABEL,
+  RATE_TYPES,
+  type RateType,
+  type SelectedRateType,
+} from "@/types/rates";
+import CurrencyInput from "./CurrencyInput";
+import { PANEL_CLASS } from "@/utils/styles";
+
+type RateOption = "current" | "historical";
+
+const isHistorical = (type: SelectedRateType): type is RateType =>
+  type !== "custom";
 
 const RateSelector: React.FC = () => {
   const {
-    setExchangeRateToUseValue: setExchangeRateToUse,
-    setExchangeRateToUseType: setExchangeRateToUseType,
-    setExchangeRateToUseUpdatedDate: setExchangeRateToUseUpdatedDate,
-    exchangeRateToUseValue: exchangeRateToUseValue,
-    exchangeRateToUseUpdatedDate: exchangeRateToUseUpdatedDate,
-    exchangeRateToUseType: exchangeRateToUseType,
+    setSelection,
+    exchangeRateToUseValue,
+    exchangeRateToUseType,
+    exchangeRateToUseUpdatedDate,
   } = useExchangeRateToUse();
-  const {
-    exchangeRateBlueAvg,
-    exchangeRateBlueLastUpdated,
-    exchangeRateCryptoAvg,
-    exchangeRateCryptoLastUpdated,
-  } = useCurrentExchangeRateContext();
+  const { rates } = useCurrentExchangeRateContext();
+  const { fetchRate, loading, error } = useHistoricalRate();
 
-  const [selectedRateType, setSelectedRateType] = useState<
-    "blue" | "cripto" | "custom"
-  >("blue");
-  const [rateOption, setRateOption] = useState<"current" | "historical">(
-    "current"
-  );
+  const [selectedRateType, setSelectedRateType] =
+    useState<SelectedRateType>("blue");
+  const [rateOption, setRateOption] = useState<RateOption>("current");
   const [selectedDate, setSelectedDate] = useState<string>("");
-  const [customRate, setCustomRate] = useState<number | "">("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
-  const [maxDate, setMaxDate] = useState<string>("");
+  const [customRate, setCustomRate] = useState<number | null>(null);
+  const [dateError, setDateError] = useState<string | null>(null);
 
-  const getMaxDate = () => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    return yesterday.toISOString().split("T")[0]; // Format as YYYY-MM-DD
-  };
+  // Recomputed every render rather than pinned at mount, so a tab left open
+  // across midnight cannot enforce yesterday's ceiling.
+  const maxDate = getMaxHistoricalDate();
 
-  const fetchHistoricalRate = async (rateType: string, date: string) => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const date_parts = date.split("-");
-      const year = date_parts[0];
-      const month = date_parts[1];
-      const day = date_parts[2];
-      const response = await axios.get(
-        `https://api.argentinadatos.com/v1/cotizaciones/dolares/${rateType}/${year}/${month}/${day}`
-      );
-
-      const buy = Math.round(response.data["compra"] * 100) / 100;
-      const sell = Math.round(response.data["venta"] * 100) / 100;
-      const avg = Math.round(((buy + sell) / 2) * 100) / 100;
-
-      return avg;
-    } catch (err) {
-      console.error("Error fetching historical rate:", err);
-      setError("Failed to fetch historical rate. Please try again.");
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRateTypeChange = async (type: "blue" | "cripto" | "custom") => {
-    setSelectedRateType(type);
-
+  /**
+   * The single path by which a selection is applied. Every argument is passed
+   * explicitly — the previous code read the rate type back out of context after
+   * setting it, which returned the *previous* render's value and so fetched
+   * blue while labelling it cripto.
+   */
+  const applySelection = async (
+    type: SelectedRateType,
+    option: RateOption,
+    date: string,
+    custom: number | null
+  ) => {
     if (type === "custom") {
-      setRateOption("current");
-      setExchangeRateToUse(customRate || null); // Use custom rate if selected
-      setExchangeRateToUseType(type);
-      setExchangeRateToUseUpdatedDate(new Date());
-    } else if (rateOption === "current") {
-      const rate =
-        type === "blue"
-          ? exchangeRateBlueAvg
-          : type === "cripto"
-          ? exchangeRateCryptoAvg
-          : null;
-      const date =
-        type === "blue"
-          ? exchangeRateBlueLastUpdated
-          : type === "cripto"
-          ? exchangeRateCryptoLastUpdated
-          : null;
-      setExchangeRateToUse(rate ?? null);
-      setExchangeRateToUseType(type);
-      setExchangeRateToUseUpdatedDate(date);
-    } else if (rateOption === "historical") {
-      if (selectedDate === undefined || selectedDate.trim() === "") return;
-      try {
-        setExchangeRateToUseType(type);
-        const rate = await fetchHistoricalRate(
-          exchangeRateToUseType!,
-          selectedDate
-        );
-
-        setExchangeRateToUse(rate ?? null);
-
-        const [year, month, day] = selectedDate.split("-");
-        const date_object = new Date(selectedDate);
-        date_object.setHours(12);
-        date_object.setDate(Number(day));
-        setExchangeRateToUseUpdatedDate(date_object);
-      } catch (error) {
-        console.error(`Error fetching historical rate:`, error);
-      }
+      setSelection({ type, value: custom, updatedDate: new Date() });
+      return;
     }
-  };
-
-  const handleRateOptionChange = async (option: "current" | "historical") => {
-    setRateOption(option);
 
     if (option === "current") {
-      const rate =
-        selectedRateType === "blue"
-          ? exchangeRateBlueAvg
-          : exchangeRateCryptoAvg;
-      const date =
-        selectedRateType === "blue"
-          ? exchangeRateBlueLastUpdated
-          : selectedRateType === "cripto"
-          ? exchangeRateCryptoLastUpdated
-          : null;
-      setExchangeRateToUse(rate ?? null);
-      setExchangeRateToUseType(selectedRateType);
-      setExchangeRateToUseUpdatedDate(date);
-    } else {
-      if (selectedDate === undefined || selectedDate.trim() === "") {
-        setExchangeRateToUse(null); // Reset the rate for historical until a date is selected
-        return;
-      }
-      try {
-        const rate = await fetchHistoricalRate(selectedRateType, selectedDate);
-        setExchangeRateToUse(rate ?? null);
-        setExchangeRateToUseType(selectedRateType);
-
-        const [year, month, day] = selectedDate.split("-");
-        const date_object = new Date(selectedDate);
-        date_object.setHours(12);
-        date_object.setDate(Number(day));
-        setExchangeRateToUseUpdatedDate(date_object);
-      } catch (error) {
-        console.error(`Error fetching historical rate:`, error);
-      }
+      const snapshot = rates[type];
+      setSelection({
+        type,
+        value: snapshot?.avg ?? null,
+        updatedDate: snapshot?.lastUpdated ?? null,
+      });
+      return;
     }
+
+    if (date.trim() === "") {
+      setSelection({ type, value: null, updatedDate: null });
+      return;
+    }
+
+    const value = await fetchRate(type, date);
+    const selection: RateSelection = {
+      type,
+      value,
+      updatedDate: parseYmdLocal(date),
+    };
+    setSelection(selection);
   };
 
-  const handleDateChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleRateTypeChange = (type: SelectedRateType) => {
+    setSelectedRateType(type);
+    const option = type === "custom" ? "current" : rateOption;
+    if (type === "custom") setRateOption("current");
+    applySelection(type, option, selectedDate, customRate);
+  };
+
+  const handleRateOptionChange = (option: RateOption) => {
+    setRateOption(option);
+    applySelection(selectedRateType, option, selectedDate, customRate);
+  };
+
+  const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const date = event.target.value;
-    const maxDate = getMaxDate();
+    setSelectedDate(date);
 
-    if (date > maxDate) {
-      alert(`Please select a date on or before ${maxDate}`);
-      setSelectedDate(maxDate);
-    } else {
-      setSelectedDate(date);
+    if (date !== "" && date > maxDate) {
+      // ISO YYYY-MM-DD sorts lexicographically, so a string compare is a date
+      // compare here. Report it and leave the user's input alone rather than
+      // blocking on alert() and overwriting what they typed.
+      setDateError(`Historical rates are only published through ${maxDate}.`);
+      return;
+    }
 
-      if (rateOption === "historical" && date) {
-        try {
-          const historical_rate = await fetchHistoricalRate(
-            selectedRateType,
-            date
-          );
+    setDateError(null);
+    applySelection(selectedRateType, rateOption, date, customRate);
+  };
 
-          setExchangeRateToUse(historical_rate);
-          setExchangeRateToUseType(selectedRateType);
-
-          const [year, month, day] = date.split("-");
-          const date_object = new Date(date);
-          date_object.setHours(12);
-          date_object.setDate(Number(day));
-          setExchangeRateToUseUpdatedDate(date_object);
-        } catch (error) {
-          console.error(`Error fetching historical rate:`, error);
-        }
-      }
+  const handleCustomRateChange = (value: number | null) => {
+    setCustomRate(value);
+    if (selectedRateType === "custom") {
+      setSelection({ type: "custom", value, updatedDate: new Date() });
     }
   };
 
-  const handleCustomRateChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = parseFloat(event.target.value);
-    setCustomRate(isNaN(value) ? "" : value);
+  const statusMessage = () => {
+    if (loading) return "Loading rate…";
+    if (exchangeRateToUseValue === null) return "No rate selected.";
 
-    if (selectedRateType === "custom" && rateOption === "current") {
-      setExchangeRateToUse(isNaN(value) ? null : value); // Use custom rate if selected
-    }
+    const label =
+      exchangeRateToUseType && isHistorical(exchangeRateToUseType)
+        ? RATE_LABEL[exchangeRateToUseType]
+        : "custom";
+    const when = exchangeRateToUseUpdatedDate
+      ? ` from ${formatDate(exchangeRateToUseUpdatedDate)}`
+      : "";
+
+    return `Using ${label} rate ${formatCurrencyARS(
+      exchangeRateToUseValue,
+      true
+    )}${when}`;
   };
-
-  useEffect(() => {
-    // Update max date whenever the component mounts
-    const newMaxDate = getMaxDate();
-    setMaxDate(newMaxDate);
-  }, []); // Empty dependency array ensures this runs only once on mount
 
   return (
-    <div className="container p-4 mb-2 border rounded shadow-sm bg-light">
+    <div className={PANEL_CLASS}>
       <div className="row">
         <div className="col">
           <h2 className="mb-4">Select Exchange Rate</h2>
@@ -211,111 +151,82 @@ const RateSelector: React.FC = () => {
       </div>
       <div className="row">
         <div className="col">
-          {" "}
-          {/* Rate Type Selection */}
           <div className="mb-3">
             <h6 className="form-label">Select Rate Type:</h6>
+            {RATE_TYPES.map((type) => (
+              <div className="form-check" key={type}>
+                <input
+                  type="radio"
+                  id={`rate-type-${type}`}
+                  name="rateType"
+                  value={type}
+                  className="form-check-input"
+                  checked={selectedRateType === type}
+                  onChange={() => handleRateTypeChange(type)}
+                />
+                <label
+                  htmlFor={`rate-type-${type}`}
+                  className="form-check-label"
+                >
+                  {RATE_LABEL[type]}
+                </label>
+              </div>
+            ))}
             <div className="form-check">
               <input
                 type="radio"
-                id="blueRate"
-                name="rateType"
-                value="blue"
-                className="form-check-input"
-                checked={selectedRateType === "blue"}
-                onChange={() => handleRateTypeChange("blue")}
-              />
-              <label htmlFor="blueRate" className="form-check-label">
-                Dólar Blue
-              </label>
-            </div>
-            <div className="form-check">
-              <input
-                type="radio"
-                id="cryptoRate"
-                name="rateType"
-                value="cripto"
-                className="form-check-input"
-                checked={selectedRateType === "cripto"}
-                onChange={() => handleRateTypeChange("cripto")}
-              />
-              <label htmlFor="cryptoRate" className="form-check-label">
-                Dólar Cripto
-              </label>
-            </div>
-            <div className="form-check">
-              <input
-                type="radio"
-                id="customRate"
+                id="rate-type-custom"
                 name="rateType"
                 value="custom"
                 className="form-check-input"
                 checked={selectedRateType === "custom"}
                 onChange={() => handleRateTypeChange("custom")}
               />
-              <label htmlFor="customRate" className="form-check-label">
+              <label htmlFor="rate-type-custom" className="form-check-label">
                 Custom Rate
               </label>
             </div>
-            {/* Custom Rate Input */}
             {selectedRateType === "custom" && (
-              <div className="mb-3">
-                <label htmlFor="customRateInput" className="form-label">
-                  Enter Custom Rate:
-                </label>
-                <input
-                  type="number"
-                  id="customRateInput"
-                  className="form-control"
-                  value={customRate || ""}
-                  onChange={handleCustomRateChange}
-                  min="0"
-                  step="0.01"
-                  placeholder="Enter rate"
+              <div className="mb-3 mt-2">
+                <CurrencyInput
+                  id="custom-rate"
+                  label="Enter Custom Rate:"
+                  currency="ARS"
+                  prefix="ARS/USD"
+                  value={customRate}
+                  onValueChange={handleCustomRateChange}
+                  min={0.01}
+                  helpText="Argentine pesos per US dollar."
                 />
               </div>
             )}
           </div>
         </div>
         <div className="col">
-          {" "}
-          {/* Rate Option Selection */}
           <div className="mb-3">
             <p className="form-label">Select Rate Option:</p>
-            <div className="form-check">
-              <input
-                type="radio"
-                id="currentRate"
-                name="rateOption"
-                value="current"
-                className="form-check-input"
-                checked={rateOption === "current"}
-                onChange={() => handleRateOptionChange("current")}
-                disabled={selectedRateType === "custom"}
-              />
-              <label htmlFor="currentRate" className="form-check-label">
-                Current Rate
-              </label>
-            </div>
-            <div className="form-check">
-              <input
-                type="radio"
-                id="historicalRate"
-                name="rateOption"
-                value="historical"
-                className="form-check-input"
-                checked={rateOption === "historical"}
-                onChange={() => handleRateOptionChange("historical")}
-                disabled={selectedRateType === "custom"}
-              />
-              <label htmlFor="historicalRate" className="form-check-label">
-                Historical Rate
-              </label>
-            </div>
+            {(["current", "historical"] as RateOption[]).map((option) => (
+              <div className="form-check" key={option}>
+                <input
+                  type="radio"
+                  id={`rate-option-${option}`}
+                  name="rateOption"
+                  value={option}
+                  className="form-check-input"
+                  checked={rateOption === option}
+                  onChange={() => handleRateOptionChange(option)}
+                  disabled={selectedRateType === "custom"}
+                />
+                <label
+                  htmlFor={`rate-option-${option}`}
+                  className="form-check-label"
+                >
+                  {option === "current" ? "Current Rate" : "Historical Rate"}
+                </label>
+              </div>
+            ))}
           </div>
         </div>
-        {/* Historical Date Picker */}
-
         <div className="col mb-3">
           <label htmlFor="rateDate" className="form-label">
             Select Date:
@@ -323,17 +234,31 @@ const RateSelector: React.FC = () => {
           <input
             type="date"
             id="rateDate"
-            className="form-control"
+            className={`form-control${dateError ? " is-invalid" : ""}`}
             value={selectedDate}
             onChange={handleDateChange}
-            max={maxDate} // Restricts the date to today or earlier
+            max={maxDate}
             disabled={rateOption === "current" || selectedRateType === "custom"}
+            aria-invalid={dateError ? true : undefined}
+            aria-describedby={dateError ? "rateDate-error" : undefined}
           />
+          {dateError && (
+            <div id="rateDate-error" className="text-danger small mt-1" role="alert">
+              {dateError}
+            </div>
+          )}
         </div>
       </div>
-      <div className="row">{`Using ${exchangeRateToUseType} rate ${exchangeRateToUseValue} from ${formatDate(
-        exchangeRateToUseUpdatedDate!
-      )}`}</div>
+      {error && (
+        <div className="row">
+          <div className="col text-danger" role="alert">
+            {error}
+          </div>
+        </div>
+      )}
+      <div className="row" aria-live="polite">
+        {statusMessage()}
+      </div>
     </div>
   );
 };
