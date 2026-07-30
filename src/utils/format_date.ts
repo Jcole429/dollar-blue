@@ -1,11 +1,71 @@
-export const formatDate = (date: Date | null | undefined) => {
-  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
-    return "Invalid date";
+import type { Locale } from "@/i18n/locales";
+import type { Messages } from "@/i18n/messages";
+
+/**
+ * Same reasoning as the currency formatters: building an `Intl.DateTimeFormat`
+ * costs far more than calling `.format` on one, and there are only two.
+ */
+const dateTimeFormatters = new Map<Locale, Intl.DateTimeFormat>();
+
+const getDateTimeFormatter = (locale: Locale): Intl.DateTimeFormat => {
+  let formatter = dateTimeFormatters.get(locale);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    dateTimeFormatters.set(locale, formatter);
   }
-  return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  })}`;
+  return formatter;
+};
+
+/**
+ * A date and time in the reader's language — `30/07/2026 15:24` in es-AR,
+ * `07/30/2026, 03:24 PM` in en-US.
+ *
+ * The locale is passed in rather than left to `toLocaleDateString()`'s default,
+ * which is the *runtime's* locale: on the server that is whatever Node was
+ * started with, so the same instant used to render two different strings either
+ * side of hydration.
+ *
+ * Returns `null` for anything that is not a real date, leaving it to the caller
+ * to decide what an absent timestamp should look like.
+ */
+export const formatDate = (
+  date: Date | null | undefined,
+  locale: Locale
+): string | null => {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return null;
+  return getDateTimeFormatter(locale).format(date);
+};
+
+const dayFormatters = new Map<Locale, Intl.DateTimeFormat>();
+
+/**
+ * Render a `YYYY-MM-DD` value as a calendar day in the reader's convention —
+ * `31/07/2026` or `07/31/2026`.
+ *
+ * `<input type="date">` speaks ISO and so do the rate APIs, but nobody wants to
+ * read `2026-07-31` in a sentence. Falls back to the raw string if it is not a
+ * date, which keeps a message that names it from going blank.
+ */
+export const formatYmd = (ymd: string, locale: Locale): string => {
+  const date = parseYmdLocal(ymd);
+  if (!date) return ymd;
+
+  let formatter = dayFormatters.get(locale);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    dayFormatters.set(locale, formatter);
+  }
+  return formatter.format(date);
 };
 
 /**
@@ -72,23 +132,30 @@ export const getMaxHistoricalDate = (): string => {
  *
  * `now` is a parameter rather than a `Date.now()` call so the caller owns the
  * clock — which is what keeps this pure and testable, and lets exactly one small
- * component subscribe to the ticking.
+ * component subscribe to the ticking. The strings arrive the same way and for the
+ * same reason: the buckets are the logic, the wording is the caller's language.
+ *
+ * `Intl.RelativeTimeFormat` would cover the numbered cases, but not "just now" or
+ * "never", and it would leave the phrasing of two of the six buckets somewhere
+ * other than the catalog. One source for all of them is worth more here than the
+ * few lines it saves.
  */
 export const describeAge = (
   lastUpdated: Date | null | undefined,
-  now: number
+  now: number,
+  age: Messages["age"]
 ): string => {
-  if (!lastUpdated) return "Never updated";
+  if (!lastUpdated) return age.never;
 
   const diffMins = Math.floor((now - lastUpdated.getTime()) / 60_000);
   const diffHours = Math.floor(diffMins / 60);
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffDays > 1) return `${diffDays} days ago`;
-  if (diffDays === 1) return "1 day ago";
-  if (diffHours > 1) return `${diffHours} hours ago`;
-  if (diffHours === 1) return "1 hour ago";
-  if (diffMins > 1) return `${diffMins} minutes ago`;
-  if (diffMins === 1) return "1 minute ago";
-  return "just now";
+  if (diffDays > 1) return age.days(diffDays);
+  if (diffDays === 1) return age.oneDay;
+  if (diffHours > 1) return age.hours(diffHours);
+  if (diffHours === 1) return age.oneHour;
+  if (diffMins > 1) return age.minutes(diffMins);
+  if (diffMins === 1) return age.oneMinute;
+  return age.justNow;
 };

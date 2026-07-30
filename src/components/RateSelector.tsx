@@ -9,23 +9,17 @@ import { useCurrentExchangeRateContext } from "@/contexts/CurrentExchangeRateCon
 import { useHistoricalRate } from "@/hooks/useHistoricalRate";
 import {
   formatDate,
+  formatYmd,
   getMaxHistoricalDate,
   parseYmdLocal,
 } from "@/utils/format_date";
 import { formatCurrencyARS } from "@/utils/format_currency";
-import {
-  RATE_LABEL,
-  RATE_TYPES,
-  type RateType,
-  type SelectedRateType,
-} from "@/types/rates";
+import { useI18n } from "@/i18n/LocaleContext";
+import { RATE_TYPES, type SelectedRateType } from "@/types/rates";
 import CurrencyInput from "./CurrencyInput";
 import { PANEL_CLASS } from "@/utils/styles";
 
 type RateOption = "current" | "historical";
-
-const isHistorical = (type: SelectedRateType): type is RateType =>
-  type !== "custom";
 
 const RateSelector: React.FC = () => {
   const {
@@ -36,13 +30,16 @@ const RateSelector: React.FC = () => {
   } = useExchangeRateToUse();
   const { rates } = useCurrentExchangeRateContext();
   const { fetchRate, loading, error } = useHistoricalRate();
+  const { locale, m } = useI18n();
 
   const [selectedRateType, setSelectedRateType] =
     useState<SelectedRateType>("blue");
   const [rateOption, setRateOption] = useState<RateOption>("current");
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [customRate, setCustomRate] = useState<number | null>(null);
-  const [dateError, setDateError] = useState<string | null>(null);
+  // The offending date rather than the sentence, so the message follows the
+  // language rather than being frozen at the moment the date was typed.
+  const [dateTooLate, setDateTooLate] = useState<boolean>(false);
 
   // Recomputed every render rather than pinned at mount, so a tab left open
   // across midnight cannot enforce yesterday's ceiling.
@@ -115,11 +112,11 @@ const RateSelector: React.FC = () => {
       // ISO YYYY-MM-DD sorts lexicographically, so a string compare is a date
       // compare here. Report it and leave the user's input alone rather than
       // blocking on alert() and overwriting what they typed.
-      setDateError(`Historical rates are only published through ${maxDate}.`);
+      setDateTooLate(true);
       return;
     }
 
-    setDateError(null);
+    setDateTooLate(false);
     applySelection(selectedRateType, rateOption, date, customRate);
   };
 
@@ -131,34 +128,32 @@ const RateSelector: React.FC = () => {
   };
 
   const statusMessage = () => {
-    if (loading) return "Loading rate…";
-    if (exchangeRateToUseValue === null) return "No rate selected.";
+    if (loading) return m.selector.loadingRate;
+    if (exchangeRateToUseValue === null) return m.selector.noRateSelected;
 
-    const label =
-      exchangeRateToUseType && isHistorical(exchangeRateToUseType)
-        ? RATE_LABEL[exchangeRateToUseType]
-        : "custom";
-    const when = exchangeRateToUseUpdatedDate
-      ? ` from ${formatDate(exchangeRateToUseUpdatedDate)}`
-      : "";
+    const label = m.rateLabel[exchangeRateToUseType ?? "custom"];
+    const amount = formatCurrencyARS(exchangeRateToUseValue, true);
+    const when = formatDate(exchangeRateToUseUpdatedDate, locale);
 
-    return `Using ${label} rate ${formatCurrencyARS(
-      exchangeRateToUseValue,
-      true
-    )}${when}`;
+    // Two whole sentences rather than one with an optional tail: Spanish needs
+    // "del" before the date, and gluing a translated fragment onto a translated
+    // stem is how word order gets locked to whichever language was written first.
+    return when === null
+      ? m.selector.using(label, amount)
+      : m.selector.usingFrom(label, amount, when);
   };
 
   return (
     <div className={PANEL_CLASS}>
       <div className="row">
         <div className="col">
-          <h2 className="mb-4">Select Exchange Rate</h2>
+          <h2 className="mb-4">{m.selector.title}</h2>
         </div>
       </div>
       <div className="row">
         <div className="col">
           <div className="mb-3">
-            <h6 className="form-label">Select Rate Type:</h6>
+            <h6 className="form-label">{m.selector.rateTypeLegend}</h6>
             {RATE_TYPES.map((type) => (
               <div className="form-check" key={type}>
                 <input
@@ -174,7 +169,7 @@ const RateSelector: React.FC = () => {
                   htmlFor={`rate-type-${type}`}
                   className="form-check-label"
                 >
-                  {RATE_LABEL[type]}
+                  {m.rateLabel[type]}
                 </label>
               </div>
             ))}
@@ -189,20 +184,20 @@ const RateSelector: React.FC = () => {
                 onChange={() => handleRateTypeChange("custom")}
               />
               <label htmlFor="rate-type-custom" className="form-check-label">
-                Custom Rate
+                {m.selector.customRate}
               </label>
             </div>
             {selectedRateType === "custom" && (
               <div className="mb-3 mt-2">
                 <CurrencyInput
                   id="custom-rate"
-                  label="Enter Custom Rate:"
+                  label={m.selector.customRateLabel}
                   currency="ARS"
                   prefix="ARS/USD"
                   value={customRate}
                   onValueChange={handleCustomRateChange}
                   min={0.01}
-                  helpText="Argentine pesos per US dollar."
+                  helpText={m.selector.customRateHelp}
                 />
               </div>
             )}
@@ -210,7 +205,7 @@ const RateSelector: React.FC = () => {
         </div>
         <div className="col">
           <div className="mb-3">
-            <p className="form-label">Select Rate Option:</p>
+            <p className="form-label">{m.selector.rateOptionLegend}</p>
             {(["current", "historical"] as RateOption[]).map((option) => (
               <div className="form-check" key={option}>
                 <input
@@ -227,7 +222,9 @@ const RateSelector: React.FC = () => {
                   htmlFor={`rate-option-${option}`}
                   className="form-check-label"
                 >
-                  {option === "current" ? "Current Rate" : "Historical Rate"}
+                  {option === "current"
+                    ? m.selector.current
+                    : m.selector.historical}
                 </label>
               </div>
             ))}
@@ -235,22 +232,26 @@ const RateSelector: React.FC = () => {
         </div>
         <div className="col mb-3">
           <label htmlFor="rateDate" className="form-label">
-            Select Date:
+            {m.selector.dateLabel}
           </label>
           <input
             type="date"
             id="rateDate"
-            className={`form-control${dateError ? " is-invalid" : ""}`}
+            className={`form-control${dateTooLate ? " is-invalid" : ""}`}
             value={selectedDate}
             onChange={handleDateChange}
             max={maxDate}
             disabled={rateOption === "current" || selectedRateType === "custom"}
-            aria-invalid={dateError ? true : undefined}
-            aria-describedby={dateError ? "rateDate-error" : undefined}
+            aria-invalid={dateTooLate ? true : undefined}
+            aria-describedby={dateTooLate ? "rateDate-error" : undefined}
           />
-          {dateError && (
-            <div id="rateDate-error" className="text-danger small mt-1" role="alert">
-              {dateError}
+          {dateTooLate && (
+            <div
+              id="rateDate-error"
+              className="text-danger small mt-1"
+              role="alert"
+            >
+              {m.selector.dateTooLate(formatYmd(maxDate, locale))}
             </div>
           )}
         </div>
@@ -258,11 +259,17 @@ const RateSelector: React.FC = () => {
       {error && (
         <div className="row">
           <div className="col text-danger" role="alert">
-            {error}
+            {error.kind === "missing"
+              ? m.selector.noRateForDate(formatYmd(error.ymd, locale))
+              : m.selector.fetchFailed}
           </div>
         </div>
       )}
-      <div className="row" aria-live="polite">
+      {/* Carries a formatted timestamp, so it mismatches on hydration for the
+          same two reasons the labels in LatestRateDisplay do: the reader's
+          timezone is unknown to the server, and Node and the browser ship
+          different ICU builds that disagree on the space inside "p. m.". */}
+      <div className="row" aria-live="polite" suppressHydrationWarning>
         {statusMessage()}
       </div>
     </div>

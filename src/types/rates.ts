@@ -23,15 +23,9 @@ export const RATE_SLUG: Record<RateType, string> = {
   crypto: "cripto",
 };
 
-export const RATE_LABEL: Record<RateType, string> = {
-  blue: "Dólar Blue",
-  crypto: "Dólar Cripto",
-};
-
-export const SELECTED_RATE_LABEL: Record<SelectedRateType, string> = {
-  ...RATE_LABEL,
-  custom: "Custom",
-};
+// What each rate is *called* now lives in the message catalog, since it differs
+// by language: `m.rateLabel` is typed `Record<SelectedRateType, string>`, so
+// adding a rate here is a compile error in every translation until it is named.
 
 /** A quote for one rate at one moment. */
 export interface RateSnapshot {

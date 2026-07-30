@@ -3,12 +3,14 @@
 import React, { useState } from "react";
 import { formatCurrencyARS, formatCurrencyUSD } from "../utils/format_currency";
 import { useExchangeRateToUse } from "@/contexts/ExchangeRateToUseContext";
+import { useI18n } from "@/i18n/LocaleContext";
 import { isUsableRate } from "@/utils/rate";
 import CurrencyInput from "./CurrencyInput";
 import { PANEL_CLASS } from "@/utils/styles";
 
 const Converter: React.FC = () => {
   const { exchangeRateToUseValue: exchangeRateToUse } = useExchangeRateToUse();
+  const { m } = useI18n();
 
   const [usdAmount, setUsdAmount] = useState<number | null>(null);
   const [arsAmount, setArsAmount] = useState<number | null>(null);
@@ -31,21 +33,21 @@ const Converter: React.FC = () => {
         <div className="col">
           <div className="row">
             <div className="col">
-              <h2 className="pt-2">Currency Converter</h2>
+              <h2 className="pt-2">{m.converter.title}</h2>
             </div>
           </div>
           <div className="row grid gap-2 p-2">
             <div className="col-md border py-2">
               <div className="row pt-2">
                 <div className="col">
-                  <h5>{"USD -> ARS"}</h5>
+                  <h5>{m.converter.usdToArs}</h5>
                 </div>
               </div>
               <div className="row pb-2">
                 <div className="col">
                   <CurrencyInput
                     id="converter-usd-amount"
-                    label="Amount in USD"
+                    label={m.converter.amountInUsd}
                     currency="USD"
                     value={usdAmount}
                     onValueChange={setUsdAmount}
@@ -55,7 +57,7 @@ const Converter: React.FC = () => {
               <div className="row">
                 <div className="col">
                   <label htmlFor="converter-ars-result" className="form-label">
-                    Converts to ARS
+                    {m.converter.convertsToArs}
                   </label>
                   <div className="input-group">
                     <span className="input-group-text">ARS</span>
@@ -73,14 +75,14 @@ const Converter: React.FC = () => {
             <div className="col-md border py-2">
               <div className="row pt-2">
                 <div className="col">
-                  <h5>{"ARS -> USD"}</h5>
+                  <h5>{m.converter.arsToUsd}</h5>
                 </div>
               </div>
               <div className="row pb-2">
                 <div className="col">
                   <CurrencyInput
                     id="converter-ars-amount"
-                    label="Amount in ARS"
+                    label={m.converter.amountInArs}
                     currency="ARS"
                     value={arsAmount}
                     onValueChange={setArsAmount}
@@ -90,7 +92,7 @@ const Converter: React.FC = () => {
               <div className="row">
                 <div className="col">
                   <label htmlFor="converter-usd-result" className="form-label">
-                    Converts to USD
+                    {m.converter.convertsToUsd}
                   </label>
                   <div className="input-group">
                     <span className="input-group-text">USD</span>

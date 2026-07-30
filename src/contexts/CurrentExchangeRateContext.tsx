@@ -23,7 +23,12 @@ const REFRESH_MS = 5 * 60_000;
 
 interface CurrentExchangeRateContextProps {
   rates: RateMap;
-  error: string | null;
+  /**
+   * True when not a single quote could be had. A flag rather than a message:
+   * the wording is the reader's language, which this provider knows nothing
+   * about, so RateLoadError does the phrasing.
+   */
+  hasError: boolean;
 }
 
 export const CurrentExchangeRateContext = createContext<
@@ -32,8 +37,6 @@ export const CurrentExchangeRateContext = createContext<
 
 const bothMissing = (rates: RateMap) =>
   RATE_TYPES.every((rateType) => rates[rateType] === null);
-
-const LOAD_ERROR = "Could not load exchange rates. Please try again later.";
 
 export const CurrentExchangeRateProvider: React.FC<{
   /** Quotes fetched during the server render, so the first paint already has them. */
@@ -73,7 +76,7 @@ export const CurrentExchangeRateProvider: React.FC<{
   }, []);
 
   const value = useMemo(
-    () => ({ rates, error: bothMissing(rates) ? LOAD_ERROR : null }),
+    () => ({ rates, hasError: bothMissing(rates) }),
     [rates]
   );
 

@@ -7,6 +7,8 @@ import {
   formatCurrency,
   type CurrencyCode,
 } from "@/utils/format_currency";
+import { useI18n } from "@/i18n/LocaleContext";
+import type { Messages } from "@/i18n/messages";
 
 interface CurrencyInputProps {
   id: string;
@@ -24,6 +26,32 @@ interface CurrencyInputProps {
   helpText?: string;
   disabled?: boolean;
 }
+
+/** Why the typed text was rejected. See the `parseError` state for why this is a code. */
+type ParseError = "notANumber" | "tooSmall" | "tooLarge";
+
+const describeParseError = (
+  parseError: ParseError | null,
+  messages: Messages["amountInput"],
+  currency: CurrencyCode,
+  min: number,
+  max: number | undefined
+): string | null => {
+  switch (parseError) {
+    case null:
+      return null;
+    case "notANumber":
+      return messages.notANumber;
+    case "tooSmall":
+      return messages.tooSmall(formatCurrency(min, currency, true));
+    case "tooLarge":
+      // `max` is always set when this code is: it is only reachable from the
+      // `max !== undefined` branch. Handled anyway rather than asserted.
+      return max === undefined
+        ? null
+        : messages.tooLarge(formatCurrency(max, currency, true));
+  }
+};
 
 /**
  * An amount input that accepts either separator convention.
@@ -46,10 +74,15 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({
   helpText,
   disabled = false,
 }) => {
+  const { m } = useI18n();
   const [text, setText] = useState<string>(
     value === null ? "" : formatAmountForInput(value, currency)
   );
-  const [parseError, setParseError] = useState<string | null>(null);
+  // The *reason* the text would not parse, never the sentence describing it.
+  // Storing the sentence would freeze it in whichever language was active when
+  // the key was pressed, so switching language left a stale message under the
+  // field. The code survives the switch; the wording is derived below.
+  const [parseError, setParseError] = useState<ParseError | null>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [syncedValue, setSyncedValue] = useState<number | null>(value);
 
@@ -77,17 +110,17 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({
     const parsed = parseAmount(raw);
 
     if (parsed === null) {
-      setParseError("Enter a number, e.g. 1.234,56");
+      setParseError("notANumber");
       onValueChange(null);
       return;
     }
     if (parsed < min) {
-      setParseError(`Must be at least ${formatCurrency(min, currency, true)}.`);
+      setParseError("tooSmall");
       onValueChange(null);
       return;
     }
     if (max !== undefined && parsed > max) {
-      setParseError(`Must be at most ${formatCurrency(max, currency, true)}.`);
+      setParseError("tooLarge");
       onValueChange(null);
       return;
     }
@@ -101,7 +134,15 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({
     if (value !== null) setText(formatAmountForInput(value, currency));
   };
 
-  const error = parseError ?? errorMessage;
+  const parseErrorMessage = describeParseError(
+    parseError,
+    m.amountInput,
+    currency,
+    min,
+    max
+  );
+
+  const error = parseErrorMessage ?? errorMessage;
   const echoId = `${id}-echo`;
   const helpId = `${id}-help`;
   const errorId = `${id}-error`;

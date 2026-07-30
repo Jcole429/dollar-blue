@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { formatCurrencyARS, formatCurrencyUSD } from "../utils/format_currency";
 import { useExchangeRateToUse } from "@/contexts/ExchangeRateToUseContext";
+import { useI18n } from "@/i18n/LocaleContext";
 import { isUsableRate } from "@/utils/rate";
 import { splitPayment, USD_INCREMENT, type Payment } from "@/lib/split_payment";
 import CurrencyInput from "./CurrencyInput";
@@ -18,6 +19,7 @@ interface Row {
 
 const PaymentSplitter: React.FC = () => {
   const { exchangeRateToUseValue: exchangeRateToUse } = useExchangeRateToUse();
+  const { m } = useI18n();
 
   const [totalArs, setTotalArs] = useState<number | null>(null);
   const [prePaymentArs, setPrePaymentArs] = useState<number | null>(null);
@@ -53,31 +55,25 @@ const PaymentSplitter: React.FC = () => {
         <div className="col">
           <div className="row">
             <div className="col">
-              <h2 className="pt-2">Payment Splitter</h2>
+              <h2 className="pt-2">{m.splitter.title}</h2>
             </div>
           </div>
           <div className="row">
             <div className="col">
-              <p>
-                Calculates the maximum amount of USD you can pay in increments of
-                ${USD_INCREMENT} and displays the remaining amount owed in ARS.
-              </p>
+              <p>{m.splitter.description(USD_INCREMENT)}</p>
             </div>
           </div>
           <div className="row pt-2">
             <div className="col">
-              <h5>Instructions:</h5>
+              <h5>{m.splitter.instructions}</h5>
             </div>
           </div>
           <div className="row">
             <div className="col">
               <ol>
-                <li>Enter the total payment amount in ARS.</li>
-                <li>
-                  Optionally, enter an initial payment in ARS before calculating
-                  the USD payment.
-                </li>
-                <li>Optionally, enter the max amount of USD to use.</li>
+                <li>{m.splitter.step1}</li>
+                <li>{m.splitter.step2}</li>
+                <li>{m.splitter.step3}</li>
               </ol>
             </div>
           </div>
@@ -85,7 +81,7 @@ const PaymentSplitter: React.FC = () => {
             <div className="col-md border py-2">
               <CurrencyInput
                 id="splitter-total"
-                label="Total Payment"
+                label={m.splitter.totalPayment}
                 currency="ARS"
                 value={totalArs}
                 onValueChange={setTotalArs}
@@ -94,13 +90,13 @@ const PaymentSplitter: React.FC = () => {
             <div className="col-md border py-2">
               <CurrencyInput
                 id="splitter-first-payment"
-                label="First Payment"
+                label={m.splitter.firstPayment}
                 currency="ARS"
                 value={prePaymentArs}
                 onValueChange={setPrePaymentArs}
                 errorMessage={
                   prePaymentTooLarge
-                    ? "First payment cannot be greater than total payment."
+                    ? m.splitter.firstPaymentTooLarge
                     : null
                 }
               />
@@ -108,7 +104,7 @@ const PaymentSplitter: React.FC = () => {
             <div className="col-md border py-2">
               <CurrencyInput
                 id="splitter-usd-limit"
-                label="USD Limit"
+                label={m.splitter.usdLimit}
                 currency="USD"
                 value={usdLimitUsd}
                 onValueChange={setUsdLimitUsd}
@@ -121,13 +117,13 @@ const PaymentSplitter: React.FC = () => {
                 <thead>
                   <tr>
                     <th scope="col" className="col-1">
-                      Payment
+                      {m.splitter.columnPayment}
                     </th>
                     <th scope="col" className="col">
-                      Value ARS
+                      {m.splitter.columnValueArs}
                     </th>
                     <th scope="col" className="col">
-                      Value USD
+                      {m.splitter.columnValueUsd}
                     </th>
                   </tr>
                 </thead>
@@ -152,7 +148,7 @@ const PaymentSplitter: React.FC = () => {
                     </tr>
                   ))}
                   <tr className="fw-bold">
-                    <td>Total</td>
+                    <td>{m.splitter.total}</td>
                     <td>{split ? formatCurrencyARS(split.total.ars) : ""}</td>
                     <td>{split ? formatCurrencyUSD(split.total.usd) : ""}</td>
                   </tr>
