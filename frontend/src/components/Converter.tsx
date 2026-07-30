@@ -1,76 +1,32 @@
 "use client";
 
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState } from "react";
 import { formatCurrencyARS, formatCurrencyUSD } from "../utils/format_currency";
 import { useExchangeRateToUse } from "@/contexts/ExchangeRateToUseContext";
+import { isUsableRate } from "@/utils/rate";
+import CurrencyInput from "./CurrencyInput";
+import { PANEL_CLASS } from "@/utils/styles";
 
 const Converter: React.FC = () => {
   const { exchangeRateToUseValue: exchangeRateToUse } = useExchangeRateToUse();
 
-  const [usdToArsInput, setUsdToArsInput] = useState<string>("");
-  const [usdToArsValue, setUsdToArsValue] = useState<number | null>(null);
+  const [usdAmount, setUsdAmount] = useState<number | null>(null);
+  const [arsAmount, setArsAmount] = useState<number | null>(null);
 
-  const [arsToUsdInput, setArsToUsdInput] = useState<number | string>("");
-  const [arsToUsdValue, setArsToUsdValue] = useState<number | null>(null);
+  const rateIsUsable = isUsableRate(exchangeRateToUse);
 
-  const [rateOverrideInput, setRateOverrideInput] = useState<string>("");
-  const [rateOverrideValue, setRateOverrideValue] = useState<number | null>(
-    null
-  );
+  const convertedArs =
+    rateIsUsable && usdAmount !== null
+      ? formatCurrencyARS(usdAmount * exchangeRateToUse)
+      : "";
 
-  const [arsAmountDisplay, setArsAmountDisplay] = useState<string>("");
-  const [usdAmountDisplay, setUsdAmountDisplay] = useState<string>("");
-
-  useEffect(() => {
-    if (exchangeRateToUse !== null && usdToArsValue !== null) {
-      if (rateOverrideValue !== null) {
-        setArsAmountDisplay(
-          formatCurrencyARS(usdToArsValue * rateOverrideValue)
-        );
-      } else {
-        setArsAmountDisplay(
-          formatCurrencyARS(usdToArsValue * exchangeRateToUse)
-        );
-      }
-    } else {
-      setArsAmountDisplay("");
-    }
-  }, [usdToArsValue, exchangeRateToUse, rateOverrideValue]);
-
-  useEffect(() => {
-    if (exchangeRateToUse !== null && arsToUsdValue !== null) {
-      if (rateOverrideValue !== null) {
-        setUsdAmountDisplay(
-          formatCurrencyUSD(arsToUsdValue / rateOverrideValue)
-        );
-      } else {
-        setUsdAmountDisplay(
-          formatCurrencyUSD(arsToUsdValue / exchangeRateToUse)
-        );
-      }
-    } else {
-      setUsdAmountDisplay("");
-    }
-  }, [arsToUsdValue, exchangeRateToUse, rateOverrideValue]);
-
-  const handleUsdToArsInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = parseFloat(event.target.value.replace(/\D/g, "")) || null;
-    setUsdToArsValue(value);
-    setUsdToArsInput(event.target.value);
-  };
-
-  const handleArsToUsdInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = parseFloat(event.target.value.replace(/\D/g, "")) || null;
-    setArsToUsdValue(value);
-    setArsToUsdInput(event.target.value);
-  };
+  const convertedUsd =
+    rateIsUsable && arsAmount !== null
+      ? formatCurrencyUSD(arsAmount / exchangeRateToUse)
+      : "";
 
   return (
-    <div className="container p-4 mb-2 border rounded shadow-sm bg-light">
+    <div className={PANEL_CLASS}>
       <div className="row">
         <div className="col">
           <div className="row">
@@ -86,26 +42,31 @@ const Converter: React.FC = () => {
                 </div>
               </div>
               <div className="row pb-2">
-                <div className="col input-group">
-                  <span className="input-group-text">USD</span>
-                  <input
-                    type="text"
-                    value={usdToArsInput}
-                    onChange={handleUsdToArsInputChange}
-                    placeholder=""
-                    className="form-control border"
+                <div className="col">
+                  <CurrencyInput
+                    id="converter-usd-amount"
+                    label="Amount in USD"
+                    currency="USD"
+                    value={usdAmount}
+                    onValueChange={setUsdAmount}
                   />
                 </div>
               </div>
               <div className="row">
-                <div className="col input-group">
-                  <span className="input-group-text">ARS</span>
-                  <input
-                    disabled
-                    type="text"
-                    value={arsAmountDisplay}
-                    className="form-control border"
-                  />
+                <div className="col">
+                  <label htmlFor="converter-ars-result" className="form-label">
+                    Converts to ARS
+                  </label>
+                  <div className="input-group">
+                    <span className="input-group-text">ARS</span>
+                    <input
+                      id="converter-ars-result"
+                      readOnly
+                      type="text"
+                      value={convertedArs}
+                      className="form-control border"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -116,27 +77,31 @@ const Converter: React.FC = () => {
                 </div>
               </div>
               <div className="row pb-2">
-                <div className="col input-group">
-                  <span className="input-group-text">ARS</span>
-                  <input
-                    type="text"
-                    value={arsToUsdInput}
-                    onChange={handleArsToUsdInputChange}
-                    placeholder=""
-                    className="form-control border"
+                <div className="col">
+                  <CurrencyInput
+                    id="converter-ars-amount"
+                    label="Amount in ARS"
+                    currency="ARS"
+                    value={arsAmount}
+                    onValueChange={setArsAmount}
                   />
                 </div>
               </div>
               <div className="row">
-                <div className="col input-group">
-                  <span className="input-group-text">USD</span>
-                  <input
-                    disabled
-                    type="text"
-                    value={usdAmountDisplay}
-                    placeholder=""
-                    className="form-control border"
-                  />
+                <div className="col">
+                  <label htmlFor="converter-usd-result" className="form-label">
+                    Converts to USD
+                  </label>
+                  <div className="input-group">
+                    <span className="input-group-text">USD</span>
+                    <input
+                      id="converter-usd-result"
+                      readOnly
+                      type="text"
+                      value={convertedUsd}
+                      className="form-control border"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
