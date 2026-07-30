@@ -66,3 +66,29 @@ export const getMaxHistoricalDate = (): string => {
   yesterday.setDate(yesterday.getDate() - 1);
   return toYmdLocal(yesterday);
 };
+
+/**
+ * Describe how long ago something happened, coarsely.
+ *
+ * `now` is a parameter rather than a `Date.now()` call so the caller owns the
+ * clock — which is what keeps this pure and testable, and lets exactly one small
+ * component subscribe to the ticking.
+ */
+export const describeAge = (
+  lastUpdated: Date | null | undefined,
+  now: number
+): string => {
+  if (!lastUpdated) return "Never updated";
+
+  const diffMins = Math.floor((now - lastUpdated.getTime()) / 60_000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffDays > 1) return `${diffDays} days ago`;
+  if (diffDays === 1) return "1 day ago";
+  if (diffHours > 1) return `${diffHours} hours ago`;
+  if (diffHours === 1) return "1 hour ago";
+  if (diffMins > 1) return `${diffMins} minutes ago`;
+  if (diffMins === 1) return "1 minute ago";
+  return "just now";
+};

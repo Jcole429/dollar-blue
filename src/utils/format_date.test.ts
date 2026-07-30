@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseYmdLocal, toYmdLocal } from "./format_date";
+import { describeAge, parseYmdLocal, toYmdLocal } from "./format_date";
 
 describe("parseYmdLocal", () => {
   it("keeps the calendar day the user picked", () => {
@@ -43,5 +43,26 @@ describe("toYmdLocal", () => {
     // 23:30 local on the 5th is the 6th in UTC for any negative offset.
     const lateEvening = new Date(2025, 6, 5, 23, 30);
     expect(toYmdLocal(lateEvening)).toBe("2025-07-05");
+  });
+});
+
+describe("describeAge", () => {
+  const now = new Date(2025, 6, 5, 12, 0, 0).getTime();
+  const ago = (minutes: number) => new Date(now - minutes * 60_000);
+
+  it.each([
+    [0, "just now"],
+    [1, "1 minute ago"],
+    [5, "5 minutes ago"],
+    [60, "1 hour ago"],
+    [125, "2 hours ago"],
+    [60 * 24, "1 day ago"],
+    [60 * 24 * 3, "3 days ago"],
+  ])("describes %i minutes as %j", (minutes, expected) => {
+    expect(describeAge(ago(minutes), now)).toBe(expected);
+  });
+
+  it.each([null, undefined])("reports %j as never updated", (value) => {
+    expect(describeAge(value, now)).toBe("Never updated");
   });
 });

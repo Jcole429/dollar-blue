@@ -5,14 +5,44 @@ cripto*. Convert between ARS and USD at the current or a historical rate, and
 split an ARS bill into the largest possible USD payment in $100 notes plus an
 ARS remainder.
 
-A single Next.js 14 app (App Router, TypeScript, Bootstrap 5). No server of its
-own and no database — rates are read in the browser directly from two public
-APIs, both of which send `Access-Control-Allow-Origin: *`:
+A single Next.js 14 app (App Router, TypeScript, Bootstrap 5). No database — rates
+come from two public sources:
 
-| Data | Source |
-|---|---|
-| Current blue / cripto | `dolarapi.com/v1/dolares/{blue,cripto}` |
-| Historical by date | `api.argentinadatos.com/v1/cotizaciones/dolares/{blue,cripto}/YYYY/MM/DD` |
+| Data | Source | Fetched |
+|---|---|---|
+| Current blue / cripto | `dolarapi.com/v1/dolares/{blue,cripto}` | Server on render, proxied on refresh |
+| Historical by date | `api.argentinadatos.com/v1/cotizaciones/dolares/{blue,cripto}/YYYY/MM/DD` | Proxied, on demand |
+
+## Caching
+
+The two kinds of rate have opposite lifetimes, so they are cached on opposite
+terms. Neither is ever fetched from the browser directly: a response this app
+serves is one whose cache headers it controls.
+
+**Current quotes** are fetched during the server render, so the first paint
+already has them and the browser makes no request on load. They are cached for
+five minutes — comfortably inside the interval at which the number actually
+moves.
+
+A tab left open re-checks every five minutes through `app/api/current`, which is
+cached `s-maxage=300`. That request is answered by the CDN rather than by
+dolarapi, so upstream traffic stays at one request per window whether one tab is
+open or a thousand. The route asks for the quotes exactly as the page render
+does, so both share a single data cache entry.
+
+**Historical quotes never change once published**, so they are cached
+permanently. That needs a header we control: argentinadatos serves this immutable
+data as `max-age=60`, and a third party's headers cannot be overridden from the
+browser. So the lookup goes through `app/api/historical/[rateType]/[ymd]`, which
+marks a successful response `immutable` for a year. Four layers then hold it, and
+a miss costs one upstream request for everyone, ever:
+
+```
+in-memory Map  ->  browser HTTP cache  ->  CDN  ->  Next data cache  ->  upstream
+```
+
+A day with *no* published rate is deliberately excluded from that: it is held for
+five minutes only, since a very recent date may simply not be published yet.
 
 ## Running locally
 

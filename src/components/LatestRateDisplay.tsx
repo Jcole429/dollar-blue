@@ -6,6 +6,7 @@ import { formatDate } from "@/utils/format_date";
 import { useCurrentExchangeRateContext } from "@/contexts/CurrentExchangeRateContext";
 import { RATE_LABEL, type RateType } from "@/types/rates";
 import { PANEL_CLASS } from "@/utils/styles";
+import RelativeTime from "./RelativeTime";
 
 interface LatestRateDisplayProps {
   rateType: RateType;
@@ -16,7 +17,7 @@ const cell = (value: number | undefined) =>
   value === undefined ? "—" : formatCurrencyARS(value, true);
 
 const LatestRateDisplay: React.FC<LatestRateDisplayProps> = ({ rateType }) => {
-  const { rates, timeSinceUpdate } = useCurrentExchangeRateContext();
+  const { rates } = useCurrentExchangeRateContext();
   const snapshot = rates[rateType];
 
   return (
@@ -58,7 +59,9 @@ const LatestRateDisplay: React.FC<LatestRateDisplayProps> = ({ rateType }) => {
           </div>
           <div className="row">
             <div className="col">
-              <p className="mb-0">Last updated: {timeSinceUpdate(rateType)}</p>
+              <p className="mb-0">
+                Last updated: <RelativeTime date={snapshot?.lastUpdated} />
+              </p>
               <p className="mb-1">
                 {snapshot?.lastUpdated ? formatDate(snapshot.lastUpdated) : ""}
               </p>
