@@ -21,6 +21,15 @@ describe("parseAmount", () => {
     ["1,234,567", 1234567],
     ["10.500", 10500],
 
+    // Regression pins: rule (d) used to be anchored per-group, so a `000` group
+    // in the middle made these parse 1000x too small — silently.
+    ["5.000.000", 5000000],
+    ["1.000.000", 1000000],
+    ["5,000,000", 5000000],
+    ["10.000.000", 10000000],
+    ["1.000.000,50", 1000000.5],
+    ["2.005.000", 2005000],
+
     // ...but not when a leading zero shows it is really a decimal (rule d)
     ["0,999", 1],
     ["0.999", 1],
