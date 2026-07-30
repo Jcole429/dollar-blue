@@ -82,8 +82,26 @@ export function useHistoricalRate() {
     []
   );
 
+  /**
+   * Abandon whatever lookup is outstanding and forget the last error.
+   *
+   * Clearing the error on its own is not enough, and that was the bug: a request
+   * already on the wire sets it again when it lands, and its empty answer gets
+   * applied over the rate the user has since chosen. Dropping `inFlight` is the
+   * load-bearing part — it makes the pending call fail the identity check below
+   * and report `undefined`, taking the same "superseded, say nothing" path a
+   * newer lookup would put it on. `loading` is cleared here because the call
+   * that would have cleared it is now the one being discarded.
+   */
+  const cancelLookup = useCallback(() => {
+    inFlight.current?.abort();
+    inFlight.current = null;
+    setLoading(false);
+    setError(null);
+  }, []);
+
   return useMemo(
-    () => ({ fetchRate, loading, error }),
-    [fetchRate, loading, error]
+    () => ({ fetchRate, cancelLookup, loading, error }),
+    [fetchRate, cancelLookup, loading, error]
   );
 }
