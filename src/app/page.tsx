@@ -6,6 +6,7 @@ import { ExchangeRateToUseProvider } from "@/contexts/ExchangeRateToUseContext";
 import RateSelector from "@/components/RateSelector";
 import LatestRateDisplay from "@/components/LatestRateDisplay";
 import RateLoadError from "@/components/RateLoadError";
+import LanguageSelector from "@/components/LanguageSelector";
 import RatesSkeletonLabel from "@/components/RatesSkeletonLabel";
 import {
   CURRENT_RATE_REVALIDATE_SECONDS,
@@ -25,6 +26,9 @@ export default function Home() {
           deliberately not shown (commit 023ab7e). The product name is a proper
           noun, so it reads the same in both languages. */}
       <h1 className="visually-hidden">Dollar Blue</h1>
+      <div className="d-flex justify-content-end px-2 pb-2">
+        <LanguageSelector />
+      </div>
       <Suspense fallback={<RatesSkeleton />}>
         <Rates />
       </Suspense>
