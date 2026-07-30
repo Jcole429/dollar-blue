@@ -6,6 +6,30 @@ const LOCALES: Record<CurrencyCode, string> = {
   USD: "en-US",
 };
 
+/**
+ * Constructing an `Intl.NumberFormat` is far more expensive than calling `.format`
+ * on one — it resolves the locale and compiles a pattern each time. The splitter
+ * table formats two cells per row on every render and the amount inputs format on
+ * every keystroke, so the handful of distinct formatters are built once and kept.
+ */
+const formatterCache = new Map<string, Intl.NumberFormat>();
+
+const getFormatter = (
+  locale: string,
+  options: Intl.NumberFormatOptions
+): Intl.NumberFormat => {
+  const key = `${locale}|${options.style ?? ""}|${options.currency ?? ""}|${
+    options.minimumFractionDigits ?? ""
+  }|${options.maximumFractionDigits ?? ""}`;
+
+  let formatter = formatterCache.get(key);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(locale, options);
+    formatterCache.set(key, formatter);
+  }
+  return formatter;
+};
+
 export const formatCurrencyARS = (
   value: number,
   includeCents: boolean = false
@@ -20,15 +44,14 @@ export const formatCurrencyARS = (
     options.maximumFractionDigits = 0;
   }
 
-  return new Intl.NumberFormat(LOCALES.ARS, options).format(value);
+  return getFormatter(LOCALES.ARS, options).format(value);
 };
 
-export const formatCurrencyUSD = (value: number) => {
-  return new Intl.NumberFormat(LOCALES.USD, {
+export const formatCurrencyUSD = (value: number) =>
+  getFormatter(LOCALES.USD, {
     style: "currency",
     currency: "USD",
   }).format(value);
-};
 
 export const formatCurrency = (
   value: number,
@@ -51,7 +74,7 @@ export const formatAmountForInput = (
   value: number,
   currency: CurrencyCode
 ): string =>
-  new Intl.NumberFormat(LOCALES[currency], {
+  getFormatter(LOCALES[currency], {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(value);
