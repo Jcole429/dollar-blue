@@ -5,6 +5,17 @@ import type { RateType } from "@/types/rates";
 import { fetchHistoricalRate } from "@/lib/rates_api";
 
 /**
+ * Why a lookup produced no rate — a value, not a sentence.
+ *
+ * The hook has no business knowing what language the page is in, and a stored
+ * sentence would keep the language it was written in across a switch. `missing`
+ * carries the date because the message names it.
+ */
+export type HistoricalError =
+  | { kind: "missing"; ymd: string }
+  | { kind: "failed" };
+
+/**
  * Fetch a historical average rate for one day.
  *
  * `<input type="date">` fires a change per segment edit, so requests pile up as
@@ -16,7 +27,7 @@ import { fetchHistoricalRate } from "@/lib/rates_api";
  */
 export function useHistoricalRate() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<HistoricalError | null>(null);
   const inFlight = useRef<AbortController | null>(null);
 
   useEffect(() => () => inFlight.current?.abort(), []);
@@ -58,10 +69,10 @@ export function useHistoricalRate() {
         case "ok":
           return result.value;
         case "missing":
-          setError(`No rate published for ${ymd}.`);
+          setError({ kind: "missing", ymd });
           return null;
         case "failed":
-          setError("Failed to fetch historical rate. Please try again.");
+          setError({ kind: "failed" });
           return null;
         case "aborted":
           // This hook superseding itself, not a failure and not an answer.

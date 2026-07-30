@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { describeAge } from "@/utils/format_date";
+import { useI18n } from "@/i18n/LocaleContext";
 
 /** How often the "x minutes ago" label is recomputed. */
 const TICK_MS = 60_000;
@@ -16,6 +17,7 @@ const TICK_MS = 60_000;
  * scoped to the only two nodes that display it.
  */
 const RelativeTime: React.FC<{ date: Date | null | undefined }> = ({ date }) => {
+  const { m } = useI18n();
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -33,7 +35,7 @@ const RelativeTime: React.FC<{ date: Date | null | undefined }> = ({ date }) => 
 
   // The server's clock and the client's can land either side of a minute
   // boundary, which is an expected mismatch rather than a bug worth warning on.
-  return <span suppressHydrationWarning>{describeAge(date, now)}</span>;
+  return <span suppressHydrationWarning>{describeAge(date, now, m.age)}</span>;
 };
 
 export default RelativeTime;

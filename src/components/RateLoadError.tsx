@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useCurrentExchangeRateContext } from "@/contexts/CurrentExchangeRateContext";
+import { useI18n } from "@/i18n/LocaleContext";
 
 /**
  * The "could not load exchange rates" notice, rendered once for the page.
@@ -11,12 +12,13 @@ import { useCurrentExchangeRateContext } from "@/contexts/CurrentExchangeRateCon
  * separate live regions.
  */
 const RateLoadError: React.FC = () => {
-  const { error } = useCurrentExchangeRateContext();
-  if (!error) return null;
+  const { hasError } = useCurrentExchangeRateContext();
+  const { m } = useI18n();
+  if (!hasError) return null;
 
   return (
     <p className="text-danger small px-2 mb-2" role="alert">
-      {error}
+      {m.rates.loadError}
     </p>
   );
 };

@@ -6,6 +6,7 @@ import { ExchangeRateToUseProvider } from "@/contexts/ExchangeRateToUseContext";
 import RateSelector from "@/components/RateSelector";
 import LatestRateDisplay from "@/components/LatestRateDisplay";
 import RateLoadError from "@/components/RateLoadError";
+import RatesSkeletonLabel from "@/components/RatesSkeletonLabel";
 import {
   CURRENT_RATE_REVALIDATE_SECONDS,
   fetchCurrentRates,
@@ -21,7 +22,8 @@ export default function Home() {
   return (
     <div className="container border m-2 p-2">
       {/* Kept for document structure and screen readers; the title is
-          deliberately not shown (commit 023ab7e). */}
+          deliberately not shown (commit 023ab7e). The product name is a proper
+          noun, so it reads the same in both languages. */}
       <h1 className="visually-hidden">Dollar Blue</h1>
       <Suspense fallback={<RatesSkeleton />}>
         <Rates />
@@ -71,9 +73,7 @@ async function Rates() {
 function RatesSkeleton() {
   return (
     <div className="row px-2">
-      <span className="visually-hidden" role="status">
-        Loading exchange rates…
-      </span>
+      <RatesSkeletonLabel />
       <div className="col-lg-4" aria-hidden="true">
         <div className="row">
           <div className="col">
