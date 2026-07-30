@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { parseAmount } from "@/utils/parse_amount";
 import {
   formatAmountForInput,
@@ -51,13 +51,18 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({
   );
   const [parseError, setParseError] = useState<string | null>(null);
   const [isFocused, setIsFocused] = useState(false);
+  const [syncedValue, setSyncedValue] = useState<number | null>(value);
 
   // Let a programmatic change (a new exchange rate, a reset) reach the box —
-  // but never while the user is mid-keystroke.
-  useEffect(() => {
-    if (isFocused) return;
+  // but never while the user is mid-keystroke, and never while what they typed
+  // failed to parse. That last guard is why this is not an effect: on blur the
+  // effect saw the null this component had just reported for the bad input and
+  // wiped the field, leaving "Enter a number" under an empty box with nothing
+  // left to correct. Deriving during render keeps unparseable text on screen.
+  if (!isFocused && parseError === null && value !== syncedValue) {
+    setSyncedValue(value);
     setText(value === null ? "" : formatAmountForInput(value, currency));
-  }, [value, currency, isFocused]);
+  }
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const raw = event.target.value;
