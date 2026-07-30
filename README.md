@@ -17,7 +17,7 @@ APIs, both of which send `Access-Control-Allow-Origin: *`:
 ## Running locally
 
 ```bash
-cd frontend && npm install && npm run dev
+npm install && npm run dev
 ```
 
 Runs on <http://localhost:3000>. There is nothing to configure — no environment
@@ -26,7 +26,7 @@ variables, no services to start.
 ## Tests
 
 ```bash
-cd frontend && npm test
+npm test
 ```
 
 Vitest covers the pure functions that decide what the app tells you:
@@ -40,7 +40,7 @@ Vitest covers the pure functions that decide what the app tells you:
 Run under Argentine time to exercise the timezone paths:
 
 ```bash
-cd frontend && TZ=America/Argentina/Buenos_Aires npm test
+TZ=America/Argentina/Buenos_Aires npm test
 ```
 
 ## Conventions worth knowing
