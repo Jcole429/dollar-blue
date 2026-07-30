@@ -9,6 +9,8 @@ import CurrencyInput from "./CurrencyInput";
 import { PANEL_CLASS } from "@/utils/styles";
 
 interface Row {
+  /** Which leg of the split this is — stable as rows appear and disappear. */
+  id: "pre" | "usd" | "final";
   payment: Payment;
   /** Which column carries the amount actually handed over in that currency. */
   highlight: "ars" | "usd";
@@ -38,10 +40,10 @@ const PaymentSplitter: React.FC = () => {
     if (!split) return [];
     const result: Row[] = [];
     if (split.prePayment)
-      result.push({ payment: split.prePayment, highlight: "ars" });
+      result.push({ id: "pre", payment: split.prePayment, highlight: "ars" });
     if (split.usdPayment)
-      result.push({ payment: split.usdPayment, highlight: "usd" });
-    result.push({ payment: split.finalPayment, highlight: "ars" });
+      result.push({ id: "usd", payment: split.usdPayment, highlight: "usd" });
+    result.push({ id: "final", payment: split.finalPayment, highlight: "ars" });
     return result;
   }, [split]);
 
@@ -131,7 +133,7 @@ const PaymentSplitter: React.FC = () => {
                 </thead>
                 <tbody>
                   {rows.map((row, index) => (
-                    <tr key={index}>
+                    <tr key={row.id}>
                       <td>{index + 1}</td>
                       <td
                         className={
