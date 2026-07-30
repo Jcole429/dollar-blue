@@ -29,7 +29,7 @@ const RateSelector: React.FC = () => {
     exchangeRateToUseUpdatedDate,
   } = useExchangeRateToUse();
   const { rates } = useCurrentExchangeRateContext();
-  const { fetchRate, loading, error } = useHistoricalRate();
+  const { fetchRate, cancelLookup, loading, error } = useHistoricalRate();
   const { locale, m } = useI18n();
 
   const [selectedRateType, setSelectedRateType] =
@@ -57,6 +57,14 @@ const RateSelector: React.FC = () => {
     date: string,
     custom: number | null
   ) => {
+    // Every route out of here either wants no lookup at all — custom, current,
+    // or an emptied date — or is about to start a fresh one that would supersede
+    // the old anyway. So the outstanding request is dropped up front, once, and
+    // its error with it. Doing this only in the handlers left the *in-flight*
+    // case alive: the request landed after the switch, set its error again and
+    // wrote its empty result over the rate the user had just picked.
+    cancelLookup();
+
     if (type === "custom") {
       setSelection({ type, value: custom, updatedDate: new Date() });
       return;
@@ -92,15 +100,25 @@ const RateSelector: React.FC = () => {
     setSelection(selection);
   };
 
+  // The date message is the one thing `applySelection` must not clear: a rate-type
+  // change that *stays* on historical goes through it, and an out-of-range date has
+  // to keep its warning across that. So it is dropped only on the way out of
+  // historical mode, where the date input is disabled and the warning unactionable.
+  const leftHistoricalMode = (option: RateOption) => {
+    if (option === "current") setDateTooLate(false);
+  };
+
   const handleRateTypeChange = (type: SelectedRateType) => {
     setSelectedRateType(type);
     const option = type === "custom" ? "current" : rateOption;
     if (type === "custom") setRateOption("current");
+    leftHistoricalMode(option);
     applySelection(type, option, selectedDate, customRate);
   };
 
   const handleRateOptionChange = (option: RateOption) => {
     setRateOption(option);
+    leftHistoricalMode(option);
     applySelection(selectedRateType, option, selectedDate, customRate);
   };
 
