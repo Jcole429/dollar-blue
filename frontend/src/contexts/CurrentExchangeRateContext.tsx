@@ -9,16 +9,20 @@ import React, {
 } from "react";
 import axios from "axios";
 import {
-  BACKEND_PATH,
+  RATE_SLUG,
   RATE_TYPES,
   type RateSnapshot,
   type RateType,
 } from "@/types/rates";
-import { toNumber } from "@/utils/rate";
+import { averageRate, toNumber } from "@/utils/rate";
 import { parseApiTimestamp } from "@/utils/format_date";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "https://dollar-blue-backend.vercel.app";
+/**
+ * Current quotes come straight from dolarapi in the browser, the same way
+ * historical quotes come straight from argentinadatos. dolarapi sends
+ * `Access-Control-Allow-Origin: *`, so no proxy is needed.
+ */
+const DOLARAPI_BASE_URL = "https://dolarapi.com/v1/dolares";
 
 /** How often the "x minutes ago" labels are recomputed. */
 const TICK_MS = 60_000;
@@ -50,21 +54,20 @@ const describeAge = (lastUpdated: Date | null, now: number): string => {
   return "just now";
 };
 
-/** The backend serialises Decimals with `str()`, so every field arrives as text. */
+/** Shape a dolarapi quote into a snapshot, or null if the payload is unusable. */
 const toSnapshot = (data: unknown): RateSnapshot | null => {
   if (typeof data !== "object" || data === null) return null;
   const record = data as Record<string, unknown>;
 
-  const buy = toNumber(record.buy);
-  const sell = toNumber(record.sell);
-  const avg = toNumber(record.avg);
-  if (buy === null || sell === null || avg === null) return null;
+  const buy = toNumber(record.compra);
+  const sell = toNumber(record.venta);
+  if (buy === null || sell === null) return null;
 
   return {
     buy,
     sell,
-    avg,
-    lastUpdated: parseApiTimestamp(record.updated_date),
+    avg: averageRate(buy, sell),
+    lastUpdated: parseApiTimestamp(record.fechaActualizacion),
   };
 };
 
@@ -87,7 +90,7 @@ export const CurrentExchangeRateProvider: React.FC<{ children: ReactNode }> = ({
         RATE_TYPES.map(async (rateType) => {
           try {
             const response = await axios.get(
-              `${API_BASE_URL}/api/${BACKEND_PATH[rateType]}`,
+              `${DOLARAPI_BASE_URL}/${RATE_SLUG[rateType]}`,
               { signal: controller.signal }
             );
             return [rateType, toSnapshot(response.data)] as const;
