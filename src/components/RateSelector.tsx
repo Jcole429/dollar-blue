@@ -81,6 +81,12 @@ const RateSelector: React.FC = () => {
     }
 
     const value = await fetchRate(type, date);
+
+    // `undefined` means a newer lookup replaced this one while it was in flight.
+    // It is answering about a date the user has already left, so it has nothing
+    // to say — applying its empty result would undo the newer selection.
+    if (value === undefined) return;
+
     const selection: RateSelection = {
       type,
       value,
