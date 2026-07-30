@@ -9,15 +9,10 @@ export default function Home() {
   return (
     <CurrentExchangeRateProvider>
       <ExchangeRateToUseProvider>
-        <div
-          className="container mx-auto border m-2 p-2"
-          // style={{ maxWidth: "800px" }}
-        >
-          <div className="row">
-            <div className="col">
-              {/* <h1 className="p-2 mb-2">Dollar Blue</h1> */}
-            </div>
-          </div>
+        <div className="container border m-2 p-2">
+          {/* Kept for document structure and screen readers; the title is
+              deliberately not shown (commit 023ab7e). */}
+          <h1 className="visually-hidden">Dollar Blue</h1>
           <div className="row px-2">
             <div className="col-lg-4">
               <div className="row">
