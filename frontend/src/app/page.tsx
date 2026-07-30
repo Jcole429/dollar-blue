@@ -33,8 +33,6 @@ export default function Home() {
               <RateSelector />
               <Converter />
               <PaymentSplitter />
-              {/* <ExchangeRatesTable /> */}
-              {/* <Graph /> */}
             </div>
           </div>
         </div>
