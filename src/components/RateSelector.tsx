@@ -1,11 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  useExchangeRateToUse,
-  type RateSelection,
-} from "@/contexts/ExchangeRateToUseContext";
-import { useCurrentExchangeRateContext } from "@/contexts/CurrentExchangeRateContext";
+import { useExchangeRateToUse } from "@/contexts/ExchangeRateToUseContext";
 import { useHistoricalRate } from "@/hooks/useHistoricalRate";
 import {
   formatDate,
@@ -28,7 +24,6 @@ const RateSelector: React.FC = () => {
     exchangeRateToUseType,
     exchangeRateToUseUpdatedDate,
   } = useExchangeRateToUse();
-  const { rates } = useCurrentExchangeRateContext();
   const { fetchRate, cancelLookup, loading, error } = useHistoricalRate();
   const { locale, m } = useI18n();
 
@@ -66,22 +61,19 @@ const RateSelector: React.FC = () => {
     cancelLookup();
 
     if (type === "custom") {
-      setSelection({ type, value: custom, updatedDate: new Date() });
+      setSelection({ source: "fixed", type, value: custom, updatedDate: new Date() });
       return;
     }
 
     if (option === "current") {
-      const snapshot = rates[type];
-      setSelection({
-        type,
-        value: snapshot?.avg ?? null,
-        updatedDate: snapshot?.lastUpdated ?? null,
-      });
+      // The intent, not a number: the provider reads the quote as it stands on
+      // every render, so this keeps meaning "current" past the next refresh.
+      setSelection({ source: "current", type });
       return;
     }
 
     if (date.trim() === "") {
-      setSelection({ type, value: null, updatedDate: null });
+      setSelection({ source: "fixed", type, value: null, updatedDate: null });
       return;
     }
 
@@ -92,12 +84,12 @@ const RateSelector: React.FC = () => {
     // to say — applying its empty result would undo the newer selection.
     if (value === undefined) return;
 
-    const selection: RateSelection = {
+    setSelection({
+      source: "fixed",
       type,
       value,
       updatedDate: parseYmdLocal(date),
-    };
-    setSelection(selection);
+    });
   };
 
   // The date message is the one thing `applySelection` must not clear: a rate-type
@@ -141,7 +133,12 @@ const RateSelector: React.FC = () => {
   const handleCustomRateChange = (value: number | null) => {
     setCustomRate(value);
     if (selectedRateType === "custom") {
-      setSelection({ type: "custom", value, updatedDate: new Date() });
+      setSelection({
+        source: "fixed",
+        type: "custom",
+        value,
+        updatedDate: new Date(),
+      });
     }
   };
 
