@@ -77,7 +77,7 @@ const PaymentSplitter: React.FC = () => {
               </ol>
             </div>
           </div>
-          <div className="row grid gap-2 px-2">
+          <div className="row gap-2 px-2">
             <div className="col-md border py-2">
               <CurrencyInput
                 id="splitter-total"
