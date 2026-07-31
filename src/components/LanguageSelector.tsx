@@ -31,11 +31,39 @@ const LanguageSelector: React.FC = () => {
       if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
     };
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setOpen(false);
-      // Escape has to leave focus somewhere sensible, not on a node that is
-      // about to be display:none — which would drop it to the document body.
-      triggerRef.current?.focus();
+      if (event.key === "Escape") {
+        setOpen(false);
+        // Escape has to leave focus somewhere sensible, not on a node that is
+        // about to be display:none — which would drop it to the document body.
+        triggerRef.current?.focus();
+        return;
+      }
+
+      if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+
+      // `role="menu"` promises arrow-key traversal, and Tab is the key the
+      // pattern reserves for leaving the widget — so without this the menu is
+      // navigable only by the one key that is supposed to close it. Handled on
+      // the document rather than the list because opening the menu leaves focus
+      // on the trigger, which is outside it.
+      event.preventDefault();
+      const items = Array.from(
+        containerRef.current?.querySelectorAll<HTMLButtonElement>(
+          '[role="menuitemradio"]'
+        ) ?? []
+      );
+      if (items.length === 0) return;
+
+      const step = event.key === "ArrowDown" ? 1 : -1;
+      const current = items.indexOf(document.activeElement as HTMLButtonElement);
+      // From the trigger, down enters at the top and up enters at the bottom.
+      const next =
+        current === -1
+          ? step === 1
+            ? 0
+            : items.length - 1
+          : (current + step + items.length) % items.length;
+      items[next]?.focus();
     };
 
     document.addEventListener("pointerdown", handlePointerDown);
@@ -77,7 +105,10 @@ const LanguageSelector: React.FC = () => {
         aria-label={m.language.label}
       >
         {LOCALES.map((option) => (
-          <li key={option}>
+          // `role="none"` because a listitem is not a permitted child of a menu:
+          // a screen reader that enforces the owned-elements contract sees the
+          // menuitems through the <li> and reports the menu as empty.
+          <li key={option} role="none">
             <button
               type="button"
               role="menuitemradio"
