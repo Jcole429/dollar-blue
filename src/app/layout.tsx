@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { LocaleProvider } from "@/i18n/LocaleContext";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { MESSAGES } from "@/i18n/messages";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,7 +14,7 @@ const inter = Inter({ subsets: ["latin"] });
 // cookie on the server and giving up the cached HTML the whole page is built on.
 export const metadata: Metadata = {
   title: "Dollar Blue",
-  description: "Cotización del dólar y conversor entre pesos y dólares",
+  description: MESSAGES[DEFAULT_LOCALE].app.description,
 };
 
 export default function RootLayout({

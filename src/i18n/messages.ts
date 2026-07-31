@@ -27,12 +27,16 @@ const RATE_LABELS_ES: Record<SelectedRateType, string> = {
  * written out per language rather than assembled from fragments.
  */
 const es = {
-  // No `title` here: the product name is a proper noun that reads the same in
-  // both languages, and the two places it renders — the <h1> in page.tsx and the
-  // metadata in layout.tsx — both spell it out directly. A key nothing reads is
-  // worse than no key, since it looks like the one place to change the name.
+  // No `title` here, though there is a `description`: the product name is a
+  // proper noun that reads the same in both languages, and the two places it
+  // renders — the <h1> in page.tsx and the metadata — both spell it out
+  // directly. A key nothing reads is worse than no key, since it looks like the
+  // one place to change the name. The sentence beside it is ordinary prose and
+  // does have to be translated.
   app: {
     loadingRates: "Cargando cotizaciones…",
+    /** The <meta name="description">, one per language. */
+    description: "Cotización del dólar y conversor entre pesos y dólares",
   },
 
   language: {
@@ -135,6 +139,7 @@ export type Messages = typeof es;
 const en: Messages = {
   app: {
     loadingRates: "Loading exchange rates…",
+    description: "Blue dollar exchange rate, and a peso to dollar converter",
   },
 
   language: {
