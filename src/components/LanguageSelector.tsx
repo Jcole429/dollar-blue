@@ -1,14 +1,21 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { useI18n } from "@/i18n/LocaleContext";
 import {
   LOCALES,
+  LOCALE_COOKIE,
   LOCALE_COUNTRY,
   LOCALE_NATIVE_NAME,
+  LOCALE_TO_SEGMENT,
   type Locale,
 } from "@/i18n/locales";
+import { withLocaleSegment } from "@/i18n/locale_path";
 import Flag from "./Flag";
+
+/** A year. The choice is a preference, not a session. */
+const COOKIE_MAX_AGE = 31_536_000;
 
 /**
  * The language picker.
@@ -17,9 +24,14 @@ import Flag from "./Flag";
  * only `bootstrap.min.css`, so `data-bs-toggle` would do nothing. Open state,
  * dismissal and focus are handled here instead. `data-bs-popper="static"` is what
  * makes Bootstrap's own positioning rules apply in the absence of Popper.
+ *
+ * Since the language lives in the URL, this is a navigation control: choosing
+ * one routes to that language's page rather than setting any state.
  */
 const LanguageSelector: React.FC = () => {
-  const { locale, setLocale, m } = useI18n();
+  const { locale, m } = useI18n();
+  const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -75,9 +87,26 @@ const LanguageSelector: React.FC = () => {
   }, [open]);
 
   const choose = (next: Locale) => {
-    setLocale(next);
+    const segment = LOCALE_TO_SEGMENT[next];
+
+    // Written here and nowhere else, so the cookie carries exactly one meaning:
+    // someone chose this. `SameSite=Lax` is load-bearing rather than
+    // incidental — the one moment the preference matters is a top-level
+    // navigation in from somewhere else, and `Strict` withholds the cookie for
+    // precisely that hop. `Secure` is conditional because a browser silently
+    // discards a secure cookie set over plain http, which would make this a
+    // no-op on localhost and hide the bug until production.
+    const secure = window.location.protocol === "https:" ? "; secure" : "";
+    document.cookie = `${LOCALE_COOKIE}=${segment}; path=/; max-age=${COOKIE_MAX_AGE}; samesite=lax${secure}`;
+
     setOpen(false);
     triggerRef.current?.focus();
+
+    // `replace`, not `push`: with `push`, Back returns to the previous language
+    // while the cookie still names the new one, so a refresh flips it forward
+    // again and the history entry is a lie. `scroll: false` because this is the
+    // same page in another language, not a new one to start at the top of.
+    router.replace(withLocaleSegment(pathname, segment), { scroll: false });
   };
 
   return (
