@@ -1,0 +1,86 @@
+// A Bootstrap build containing only what this app uses.
+//
+// The full stylesheet is 228 kB (31 kB gzipped) of render-blocking CSS for a
+// page that uses the grid, forms, buttons, one dropdown, tables and a few dozen
+// utilities. It also shipped the modal, carousel, offcanvas, accordion, navbar,
+// nav, breadcrumb, pagination, badge, alert, progress, spinner, list-group,
+// toast, tooltip, popover, card and placeholder components, none of which appear
+// anywhere in src/.
+//
+// Adding a Bootstrap class that is not covered here will silently do nothing, so
+// the component list and the utility list below are the contract: extend them
+// rather than reaching for a class and wondering why it had no effect.
+
+// 1. Configuration. Required by everything below, emits no CSS on its own.
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
+@import "bootstrap/scss/maps";
+@import "bootstrap/scss/mixins";
+@import "bootstrap/scss/utilities";
+
+// 2. Trim the utilities map to the groups actually used.
+//
+// This is the single biggest saving: utilities are 11 kB gzipped of the 31 kB,
+// because Bootstrap generates every group at every breakpoint. Filtering by key
+// keeps each surviving group whole — including its responsive variants, so a
+// `d-md-none` added later still works — while dropping the ~50 groups nothing
+// references. Grid columns are not utilities and are unaffected.
+$used-utilities: (
+  // layout
+  "display",
+  "justify-content",
+  "align-items",
+  "gap",
+  // spacing
+  "margin",
+  "margin-top",
+  "margin-bottom",
+  "padding",
+  "padding-x",
+  "padding-y",
+  "padding-top",
+  "padding-bottom",
+  // decoration
+  "border",
+  "rounded",
+  "shadow",
+  "background-color",
+  "color",
+  // text
+  "text-align",
+  "font-size",
+  "font-weight"
+);
+
+$kept: ();
+@each $key, $value in $utilities {
+  @if index($used-utilities, $key) {
+    $kept: map-merge(
+      $kept,
+      (
+        $key: $value,
+      )
+    );
+  }
+}
+$utilities: $kept;
+
+// 3. Layout and components. `root` emits the --bs-* custom properties that
+//    reboot and every component below read, so it cannot be dropped.
+@import "bootstrap/scss/root";
+@import "bootstrap/scss/reboot";
+@import "bootstrap/scss/type"; // heading classes, and `.small`
+@import "bootstrap/scss/containers";
+@import "bootstrap/scss/grid";
+@import "bootstrap/scss/tables";
+@import "bootstrap/scss/forms";
+@import "bootstrap/scss/buttons";
+@import "bootstrap/scss/dropdown";
+
+// 4. One helper. The rest of that file is ratios, stacks, stretched links,
+//    coloured links, focus rings and the like, none of which are used.
+@import "bootstrap/scss/helpers/visually-hidden";
+
+// 5. Generates the classes from the map filtered in step 2. Must come last.
+@import "bootstrap/scss/utilities/api";
