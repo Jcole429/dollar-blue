@@ -18,6 +18,16 @@ import Flag from "./Flag";
 const COOKIE_MAX_AGE = 31_536_000;
 
 /**
+ * Whether the language just changed because someone picked it here.
+ *
+ * Module scope rather than a ref on purpose: changing the segment replaces the
+ * route, and this component does not survive that with its refs intact. There
+ * is one picker on the page, so one flag is enough. See `choose` for what it
+ * is for.
+ */
+let choosing = false;
+
+/**
  * The language picker.
  *
  * Bootstrap's dropdown *styles* are used but not its JavaScript — the app loads
@@ -35,6 +45,17 @@ const LanguageSelector: React.FC = () => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // Focus has to be put back *after* the navigation, not before it. Choosing a
+  // language replaces the route, and a `.focus()` call made in the click
+  // handler is undone by the time the new tree is on screen — which drops a
+  // keyboard user who just used the menu at the top of the document. Guarded by
+  // the flag so that arriving at a language any other way does not steal focus.
+  useEffect(() => {
+    if (!choosing) return;
+    choosing = false;
+    triggerRef.current?.focus();
+  }, [locale]);
 
   useEffect(() => {
     if (!open) return;
@@ -87,6 +108,15 @@ const LanguageSelector: React.FC = () => {
   }, [open]);
 
   const choose = (next: Locale) => {
+    // Picking the language already showing is a no-op worth taking early:
+    // there is nowhere to navigate, so nothing would fire the effect below and
+    // focus would be left wherever the closing menu dropped it.
+    if (next === locale) {
+      setOpen(false);
+      triggerRef.current?.focus();
+      return;
+    }
+
     const segment = LOCALE_TO_SEGMENT[next];
 
     // Written here and nowhere else, so the cookie carries exactly one meaning:
@@ -100,7 +130,7 @@ const LanguageSelector: React.FC = () => {
     document.cookie = `${LOCALE_COOKIE}=${segment}; path=/; max-age=${COOKIE_MAX_AGE}; samesite=lax${secure}`;
 
     setOpen(false);
-    triggerRef.current?.focus();
+    choosing = true;
 
     // `replace`, not `push`: with `push`, Back returns to the previous language
     // while the cookie still names the new one, so a refresh flips it forward
