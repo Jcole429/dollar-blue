@@ -8,14 +8,10 @@ import React, {
   useContext,
 } from "react";
 import { useCurrentExchangeRateContext } from "@/contexts/CurrentExchangeRateContext";
+import { resolveRate, type RateSelection } from "@/lib/resolve_rate";
 import type { SelectedRateType } from "@/types/rates";
 
-/** An explicit choice the user has made in the rate selector. */
-export interface RateSelection {
-  type: SelectedRateType;
-  value: number | null;
-  updatedDate: Date | null;
-}
+export type { RateSelection };
 
 interface ExchangeRateToUseContextProps {
   /** The rate every calculator uses. Falls back to the live blue average. */
@@ -41,12 +37,7 @@ export const ExchangeRateToUseProvider: React.FC<{ children: ReactNode }> = ({
   // silently snapped the user back to blue.
   const [selection, setSelection] = useState<RateSelection | null>(null);
 
-  const blue = rates.blue;
-  const effective: RateSelection =
-    selection ??
-    (blue
-      ? { type: "blue", value: blue.avg, updatedDate: blue.lastUpdated }
-      : { type: "blue", value: null, updatedDate: null });
+  const effective = resolveRate(selection, rates);
 
   // Memoised on the three primitives rather than on `effective`, which is rebuilt
   // every render. Without this a re-render of the provider — for any reason at
