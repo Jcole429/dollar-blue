@@ -77,6 +77,15 @@ const RateSelector: React.FC = () => {
       return;
     }
 
+    // The same bail-out `handleDateChange` performs, repeated here because this
+    // is the other way in: changing rate type keeps the date, and the date can
+    // already be past the ceiling. Fetching it anyway earned a 404, and that 404
+    // is reported as an absent rate rather than as a superseded one — so it wrote
+    // an empty selection over whatever the user was working with, blanking the
+    // converter and the splitter behind a message that contradicted the warning
+    // beside the field. Returning leaves the last good selection standing.
+    if (date > maxDate) return;
+
     const value = await fetchRate(type, date);
 
     // `undefined` means a newer lookup replaced this one while it was in flight.
