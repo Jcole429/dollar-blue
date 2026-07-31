@@ -21,6 +21,17 @@ import { RATE_TYPES } from "@/types/rates";
 /** Serve a slightly stale quote while refreshing, rather than stall at the boundary. */
 const STALE_WHILE_REVALIDATE = 60;
 
+/**
+ * Declared rather than inherited. `GET` takes no `Request`, so Next prerenders
+ * this route, and its revalidation was coming from the `next.revalidate` on the
+ * fetch below — which is a fetch that may not happen. If the upstream is
+ * unreachable at build time the handler returns 502 without one, and an entry
+ * with no revalidation is one that never regenerates: the deployment would serve
+ * that 502 until the next push. Next requires a literal here, so this must be
+ * kept equal to CURRENT_RATE_REVALIDATE_SECONDS.
+ */
+export const revalidate = 300;
+
 export async function GET() {
   const rates = await fetchCurrentRates({
     next: { revalidate: CURRENT_RATE_REVALIDATE_SECONDS },
