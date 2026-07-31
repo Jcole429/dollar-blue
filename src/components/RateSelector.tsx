@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useExchangeRateToUse } from "@/contexts/ExchangeRateToUseContext";
 import { useHistoricalRate } from "@/hooks/useHistoricalRate";
 import {
@@ -39,6 +39,19 @@ const RateSelector: React.FC = () => {
   // Recomputed every render rather than pinned at mount, so a tab left open
   // across midnight cannot enforce yesterday's ceiling.
   const maxDate = getMaxHistoricalDate();
+
+  // Reading the clock during render makes this value the server's answer during
+  // the prerender and the reader's on the client — a whole day apart for anyone
+  // west of UTC in the evening, which is everyone this app is for. React 18 does
+  // not repair a mismatched attribute, so the server's ceiling would sit on the
+  // input until something happened to re-render, and opening the date picker is
+  // not something. The ceiling is therefore withheld until the client owns the
+  // DOM. Every check below runs only in response to a user event, so validation
+  // is always against the local value regardless.
+  const [mounted, setMounted] = useState<boolean>(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   /**
    * The single path by which a selection is applied. Every argument is passed
@@ -264,7 +277,7 @@ const RateSelector: React.FC = () => {
             className={`form-control${dateTooLate ? " is-invalid" : ""}`}
             value={selectedDate}
             onChange={handleDateChange}
-            max={maxDate}
+            max={mounted ? maxDate : undefined}
             disabled={rateOption === "current" || selectedRateType === "custom"}
             aria-invalid={dateTooLate ? true : undefined}
             aria-describedby={dateTooLate ? "rateDate-error" : undefined}
