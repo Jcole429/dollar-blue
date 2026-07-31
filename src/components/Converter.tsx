@@ -36,7 +36,7 @@ const Converter: React.FC = () => {
               <h2 className="pt-2">{m.converter.title}</h2>
             </div>
           </div>
-          <div className="row grid gap-2 p-2">
+          <div className="row gap-2 p-2">
             <div className="col-md border py-2">
               <div className="row pt-2">
                 <div className="col">
