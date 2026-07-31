@@ -34,9 +34,6 @@ export const LOCALE_COUNTRY: Record<Locale, "AR" | "US"> = {
   "en-US": "US",
 };
 
-export const isLocale = (value: unknown): value is Locale =>
-  typeof value === "string" && (LOCALES as string[]).includes(value);
-
 /**
  * What each language is called in a URL.
  *

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MESSAGES } from "./messages";
-import { LOCALES, LOCALE_NATIVE_NAME, isLocale } from "./locales";
+import { LOCALES, LOCALE_NATIVE_NAME } from "./locales";
 
 type Entry = { path: string; value: unknown };
 
@@ -23,7 +23,6 @@ describe("message catalogs", () => {
   it("covers every locale", () => {
     for (const locale of LOCALES) {
       expect(MESSAGES[locale]).toBeDefined();
-      expect(isLocale(locale)).toBe(true);
       expect(LOCALE_NATIVE_NAME[locale]).toBeTruthy();
     }
   });
