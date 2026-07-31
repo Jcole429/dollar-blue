@@ -2,80 +2,47 @@
 
 import React, {
   createContext,
-  useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useState,
   type ReactNode,
 } from "react";
-import { DEFAULT_LOCALE, isLocale, type Locale } from "./locales";
+import type { Locale } from "./locales";
 import { MESSAGES, type Messages } from "./messages";
-
-const STORAGE_KEY = "dollar-blue.locale";
 
 interface LocaleContextProps {
   locale: Locale;
-  setLocale: (locale: Locale) => void;
   /** The active catalog. Named short because it appears in nearly every line of JSX. */
   m: Messages;
 }
 
 const LocaleContext = createContext<LocaleContextProps | undefined>(undefined);
 
-const readStoredLocale = (): Locale | null => {
-  try {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    return isLocale(stored) ? stored : null;
-  } catch {
-    // Storage can throw outright when it is disabled or the quota is gone. A
-    // language preference is not worth taking the page down for.
-    return null;
-  }
-};
-
 /**
- * Holds the chosen language and hands out the matching catalog.
+ * Hands the active catalog to the client components below it.
  *
- * The first render is **always** `DEFAULT_LOCALE`, on the server and on the
- * client alike, and the stored preference is applied in an effect afterwards.
- * That ordering is deliberate: reading the preference from a cookie during the
- * server render would give a flash-free result, but it also opts the route out
- * of static rendering, and the page is deliberately served as cached HTML with
- * its quotes already in it. Since Spanish is both the default and what nearly
- * every visitor wants, the cost lands only on someone who has explicitly chosen
- * English — they see one frame of Spanish before hydration swaps it.
+ * The locale is a prop, taken from the `[locale]` path segment, and pointedly
+ * not state. The URL is the single source of truth for what language a render
+ * is in, which is what lets `<html lang>`, the metadata and every visible
+ * string be decided on the server and prerendered together. There is nothing
+ * here to correct after hydration, so there is no first frame in the wrong
+ * language.
+ *
+ * This used to read `localStorage` in an effect, which meant the first render
+ * was always the default. A cookie read would have fixed the flash but opted
+ * the route out of static rendering; the segment gives both, because each
+ * language is simply its own prerendered route. Anything that reintroduces a
+ * request read here gives that back.
+ *
+ * Changing language is therefore a navigation, not a `setState` — see
+ * LanguageSelector — and there is no setter in this context to reach for.
  */
-export const LocaleProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
-
-  useEffect(() => {
-    const stored = readStoredLocale();
-    // Skipping the no-op keeps the common case at exactly one render.
-    if (stored !== null && stored !== DEFAULT_LOCALE) setLocaleState(stored);
-  }, []);
-
-  // `<html lang>` is server-rendered as the default and corrected here. It drives
-  // screen-reader pronunciation and the browser's own translate prompt, so it has
-  // to track the language actually on screen.
-  useEffect(() => {
-    document.documentElement.lang = locale;
-  }, [locale]);
-
-  const setLocale = useCallback((next: Locale) => {
-    setLocaleState(next);
-    try {
-      window.localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      // Same as the read: the choice still applies for this session.
-    }
-  }, []);
-
+export const LocaleProvider: React.FC<{
+  locale: Locale;
+  children: ReactNode;
+}> = ({ locale, children }) => {
   const value = useMemo(
-    () => ({ locale, setLocale, m: MESSAGES[locale] }),
-    [locale, setLocale]
+    () => ({ locale, m: MESSAGES[locale] }),
+    [locale]
   );
 
   return (
