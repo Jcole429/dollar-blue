@@ -165,7 +165,12 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({
           type="text"
           inputMode="decimal"
           autoComplete="off"
-          className={`form-control border${error ? " is-invalid" : ""}`}
+          // No `border` utility here. It resolves to exactly the border
+          // `form-control` already draws, but as `!important` — which outranks
+          // the red one `is-invalid` asks for, so a rejected amount kept a grey
+          // box. The date input in RateSelector never carried it and has always
+          // turned red properly.
+          className={`form-control${error ? " is-invalid" : ""}`}
           value={text}
           onChange={handleChange}
           onFocus={() => setIsFocused(true)}
