@@ -189,8 +189,14 @@ const RateSelector: React.FC = () => {
       </div>
       <div className="row">
         <div className="col">
-          <div className="mb-3">
-            <h6 className="form-label">{m.selector.rateTypeLegend}</h6>
+          {/* A real fieldset, so the group name is announced with each radio
+              rather than merely sitting above them. It was an <h6> here and a
+              <p> on the sibling group: two spellings of the same thing, one of
+              which also put a level-6 heading directly under a level-2. */}
+          <fieldset className="mb-3">
+            <legend className="form-label fs-6">
+              {m.selector.rateTypeLegend}
+            </legend>
             {RATE_TYPES.map((type) => (
               <div className="form-check" key={type}>
                 <input
@@ -238,11 +244,13 @@ const RateSelector: React.FC = () => {
                 />
               </div>
             )}
-          </div>
+          </fieldset>
         </div>
         <div className="col">
-          <div className="mb-3">
-            <p className="form-label">{m.selector.rateOptionLegend}</p>
+          <fieldset className="mb-3">
+            <legend className="form-label fs-6">
+              {m.selector.rateOptionLegend}
+            </legend>
             {(["current", "historical"] as RateOption[]).map((option) => (
               <div className="form-check" key={option}>
                 <input
@@ -265,7 +273,7 @@ const RateSelector: React.FC = () => {
                 </label>
               </div>
             ))}
-          </div>
+          </fieldset>
         </div>
         <div className="col mb-3">
           <label htmlFor="rateDate" className="form-label">
