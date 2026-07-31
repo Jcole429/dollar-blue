@@ -13,6 +13,7 @@ import {
   type Locale,
 } from "@/i18n/locales";
 import { MESSAGES } from "@/i18n/messages";
+import { SITE_URL } from "@/lib/site_url";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -61,10 +62,30 @@ const localeFromParams = (segment: string): Locale => {
 export function generateMetadata({ params }: LocaleLayoutProps): Metadata {
   const locale = localeFromParams(params.locale);
 
+  // Built from the segment list rather than written out, so a third language
+  // cannot ship announcing only two.
+  const languages: Record<string, string> = Object.fromEntries(
+    LOCALE_SEGMENTS.map((segment): [string, string] => [
+      SEGMENT_TO_LOCALE[segment],
+      `/${segment}`,
+    ])
+  );
+  // `/` is the negotiating entry point, which is exactly what x-default is
+  // for: where to send a reader whose language none of the alternates claim.
+  languages["x-default"] = "/";
+
   return {
+    metadataBase: SITE_URL,
     // A proper noun: it reads the same in both languages, same as the <h1>.
     title: "Dollar Blue",
     description: MESSAGES[locale].app.description,
+    alternates: {
+      // Each language is its own canonical. Pointing both at `/` would ask a
+      // search engine to collapse them into one page, which is the opposite of
+      // why they were separated.
+      canonical: `/${params.locale}`,
+      languages,
+    },
   };
 }
 
