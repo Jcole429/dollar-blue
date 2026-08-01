@@ -67,10 +67,18 @@ export function middleware(request: NextRequest) {
  * would otherwise be dead ends. The trailing `\..*` clause covers favicon.ico
  * and anything else with an extension.
  *
+ * `_next` is excluded whole rather than as `_next/static` and `_next/image`.
+ * Those two are the only ones production serves, so naming them looked
+ * sufficient and was not: the dev server also fetches `/_next/webpack-hmr`,
+ * which has no file extension, and redirecting it to `/es` leaves hot reload
+ * silently dead — the browser keeps showing code that is no longer on disk.
+ * `_vercel` goes with it for the same reason; the platform answers those before
+ * middleware in production, but nothing guarantees that anywhere else.
+ *
  * Must stay a literal: Next reads this statically, so it cannot be built from
  * `LOCALE_SEGMENTS`. A third language means adding a branch here by hand — the
- * test in the curl matrix is what catches forgetting.
+ * curl matrix is what catches forgetting.
  */
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|es$|en$|.*\\..*).*)"],
+  matcher: ["/((?!api|_next|_vercel|es$|en$|.*\\..*).*)"],
 };
